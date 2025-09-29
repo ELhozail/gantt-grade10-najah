@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Gantt — AlNajah Rahat (Grade 10)</title>
+  <title>לוח גאנט — אלנג'אח رهط (שכבה י׳)</title>
 
   <!-- Bootstrap RTL + Frappe Gantt -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css" rel="stylesheet">
 
   <style>
-    body { background:#ffffff; color:#000000; }
-    header { background:#f0f0f0; padding:1rem; margin-bottom:1rem; border-bottom:2px solid #ccc; }
+    body { background:#ffffff; color:#000; }
+    header { background:#f0f0f0; padding:1rem 0; margin-bottom:1rem; border-bottom:2px solid #ddd; }
     .card { background:#fff; border:1px solid #ddd; border-radius:12px; }
 
     .legend span { margin-inline-end:1rem; color:#333; font-size:.9rem }
@@ -19,40 +19,65 @@
     .lg-p{background:#ef4b6c;} .lg-k{background:#06b6d4;}
     .lg-t{background:#ff9800;} .lg-m{background:#43a047;} .lg-h{background:#9e9e9e;}
 
-    /* צבעים לפי תחום */
+    /* צבעי bars לפי תחום */
     .gantt .bar-פדגוגי{fill:#ef4b6c;}
     .gantt .bar-קהילתי{fill:#06b6d4;}
     .gantt .bar-טכנולוגי{fill:#ff9800;}
     .gantt .bar-מוסדי{fill:#43a047;}
     .gantt .bar-חברתי{fill:#9e9e9e;}
 
-    /* טקסטים */
+    /* כותרות ציר (ימים/חודשים) – שחור ומודגש */
     .gantt .grid-header .upper-text,
     .gantt .grid-header .lower-text{fill:#000;font-weight:700}
+    .gantt .lower-text{font-size:13px}
+    .gantt .upper-text{font-size:14px}
+
+    /* טקסט על bars – שחור מודגש עם קו מתאר לבן */
     .gantt .bar text{
       fill:#000 !important;
-      font-weight:700;
+      font-weight:800;
       font-size:14px;
+      paint-order:stroke fill;
+      stroke:#fff;
+      stroke-width:2px;
+      stroke-linejoin:round;
     }
 
     .details-container{
-      background:#f8f9fa;color:#000;padding:10px;border-radius:8px;text-align:right;
-      border:1px solid #ddd;
+      background:#f8f9fa;color:#000;padding:10px;border-radius:10px;text-align:right;
+      border:1px solid #ddd
+    }
+
+    /* --- היפוך ציר הזמן מימין לשמאל --- */
+    #gantt .grid {
+      transform: scaleX(-1);
+      transform-origin: center;
+    }
+    #gantt .bar-group,
+    #gantt .lower-text,
+    #gantt .upper-text {
+      transform: scaleX(-1);
+      transform-origin: center;
+      direction: ltr;   /* לא להפוך אותיות */
     }
   </style>
 </head>
 <body>
 <header>
-  <div class="container d-flex align-items-center gap-3">
-    <img src="logo.png" alt="Logo" style="height:60px;">
-    <h1 class="h4 m-0">📘 בית ספר אלנג'אח — AlNajah Rahat (Grade 10)</h1>
-  </div>
-  <div class="container legend mt-2">
-    <span><i class="lg-p"></i> פדגוגי</span>
-    <span><i class="lg-k"></i> קהילתי</span>
-    <span><i class="lg-t"></i> טכנולוגי</span>
-    <span><i class="lg-m"></i> מוסדי</span>
-    <span><i class="lg-h"></i> חברתי</span>
+  <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div class="d-flex align-items-center gap-3">
+      <img src="logo.png" alt="לוגו" style="height:60px;">
+      <div>
+        <h1 class="h4 m-0">📘 בית ספר אלנג'אח — Rahat (שכבה י׳)</h1>
+        <div class="legend mt-2">
+          <span><i class="lg-p"></i> פדגוגי</span>
+          <span><i class="lg-k"></i> קהילתי</span>
+          <span><i class="lg-t"></i> טכנולוגי</span>
+          <span><i class="lg-m"></i> מוסדי</span>
+          <span><i class="lg-h"></i> חברתי</span>
+        </div>
+      </div>
+    </div>
   </div>
 </header>
 
@@ -66,11 +91,13 @@
 
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
 <script>
-  // הנתונים מתוך data.json — הוטמעו כאן
+  // === כאן כל המשימות מתוך data.json הוטמעו inline ===
   const inlineData = [
     {"id":"1","domain":"פדגוגי","name":"סדנת פתיחת שנה","start":"2025-09-05","end":"2025-09-10","progress":100},
-    {"id":"2","domain":"חברתי","name":"פעילות גיבוש שכבת י׳","start":"2025-10-01","end":"2025-10-05","progress":50}
-    // כאן מוסיפים את כל שאר המשימות שהיו ב-data.json
+    {"id":"2","domain":"קהילתי","name":"פעילות קהילתית","start":"2025-10-01","end":"2025-10-05","progress":50},
+    {"id":"3","domain":"טכנולוגי","name":"פרויקט PBL","start":"2025-11-01","end":"2025-11-20","progress":30},
+    {"id":"4","domain":"מוסדי","name":"השקת תכנית בית ספרית","start":"2025-12-01","end":"2025-12-10","progress":80}
+    // כאן כל שאר המשימות שלך (העתק מ-data.json)
   ];
 
   function normalizeDate(dateStr){
@@ -78,7 +105,8 @@
     if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const d = new Date(dateStr);
     if(!isNaN(d)){
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), da=String(d.getDate()).padStart(2,"0");
+      return `${y}-${m}-${da}`;
     }
     return String(dateStr);
   }
@@ -90,27 +118,43 @@
       name:t.name,
       start:normalizeDate(t.start),
       end:normalizeDate(t.end),
-      progress:Number(t.progress || 0)
+      progress:Number(t.progress||0)
     };
+  }
+
+  function hebrewizeMonths(){
+    const engToHe={
+      "January":"ינואר","February":"פברואר","March":"מרץ","April":"אפריל","May":"מאי","June":"יוני",
+      "July":"יולי","August":"אוגוסט","September":"ספטמבר","October":"אוקטובר","November":"נובמבר","December":"דצמבר"
+    };
+    document.querySelectorAll("#gantt .upper-text").forEach(el=>{
+      const txt=(el.textContent||"").trim();
+      if(engToHe[txt]) el.textContent=engToHe[txt];
+    });
   }
 
   function render(){
     const el=document.getElementById('gantt');
     if(!Array.isArray(inlineData) || !inlineData.length){
-      el.innerHTML="<p class='text-center text-warning p-4'>No Data</p>";
+      el.innerHTML="<p class='text-center text-warning p-4'>אין נתונים</p>";
       return;
     }
-    new Gantt("#gantt", inlineData.map(normalizeTask), {
+    const gantt = new Gantt("#gantt", inlineData.map(normalizeTask), {
       view_mode:"Month",
       custom_popup_html:task=>{
         return `<div class="details-container">
           <div class="fw-bold">${task.name}</div>
           <div>תחום: ${task.domain||'-'}</div>
-          <div>Dates: ${task.start} → ${task.end}</div>
-          <div>Progress: ${task.progress??0}%</div>
+          <div>תאריכים: ${task.start} → ${task.end}</div>
+          <div>התקדמות: ${task.progress??0}%</div>
         </div>`;
       }
     });
+    gantt.gantt_start = new Date("2025-01-01");
+    gantt.gantt_end   = new Date("2026-12-31");
+    gantt.setup_dates();
+    gantt.render();
+    hebrewizeMonths();
   }
 
   document.addEventListener("DOMContentLoaded", render);
