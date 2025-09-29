@@ -1,158 +1,422 @@
-import json
-from pathlib import Path
-
-# Load tasks from the uploaded data.json
-src = Path("/mnt/data/data.json")
-tasks = json.loads(src.read_text(encoding="utf-8")) if src.exists() else []
-
-html = f"""<!doctype html>
+<!doctype html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>לוח גאנט — אלנג'אח رهט (שכבה י׳)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>לוח גאנט — עברית (2025–2026)</title>
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
-  <link href="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.css" rel="stylesheet">
+  <!-- vis-timeline CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/vis-timeline@7.7.0/styles/vis-timeline-graph2d.min.css">
+  <script src="https://unpkg.com/vis-data@7.1.4/peer/umd/vis-data.min.js"></script>
+  <script src="https://unpkg.com/vis-timeline@7.7.0/peer/umd/vis-timeline-graph2d.min.js"></script>
 
   <style>
-    body {{ background:#ffffff; color:#000; }}
-    header {{ background:#f0f0f0; padding:1rem 0; margin-bottom:1rem; border-bottom:2px solid #ddd; }}
-    .card {{ background:#fff; border:1px solid #ddd; border-radius:12px; }}
-
-    .legend span {{ margin-inline-end:1rem; color:#333; font-size:.9rem }}
-    .legend i {{ display:inline-block; width:14px; height:14px; border-radius:3px; margin-left:4px; }}
-    .lg-p{{background:#ef4b6c;}} .lg-k{{background:#06b6d4;}}
-    .lg-t{{background:#ff9800;}} .lg-m{{background:#43a047;}} .lg-h{{background:#9e9e9e;}}
-
-    .gantt .bar-פדגוגי{{fill:#ef4b6c;}}
-    .gantt .bar-קהילתי{{fill:#06b6d4;}}
-    .gantt .bar-טכנולוגי{{fill:#ff9800;}}
-    .gantt .bar-מוסדי{{fill:#43a047;}}
-    .gantt .bar-חברתי{{fill:#9e9e9e;}}
-
-    .gantt .grid-header .upper-text,
-    .gantt .grid-header .lower-text{{fill:#000;font-weight:700}}
-    .gantt .lower-text{{font-size:13px}}
-    .gantt .upper-text{{font-size:14px}}
-
-    .gantt .bar text{{
-      fill:#000 !important;
+    :root{
+      --bg:#f7f7f9;
+      --card:#ffffff;
+      --ink:#111;
+      --muted:#6b7280;
+      --accent:#0ea5e9;
+      --chip:#ef4444;
+      --radius:16px;
+      --shadow:0 8px 24px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--ink);
+      font-family: "Heebo", "Rubik", "Assistant", "Arial", sans-serif;
+      line-height:1.45;
+      direction: rtl;
+      text-align:right;
+    }
+    header{
+      padding:22px 18px 6px;
+    }
+    h1{
+      margin:0 0 8px;
+      font-size: clamp(22px, 3vw, 34px);
       font-weight:800;
+      letter-spacing:.2px;
+    }
+    .toolbar{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:center;
+      color:var(--muted);
       font-size:14px;
-      paint-order:stroke fill;
-      stroke:#fff;
-      stroke-width:2px;
-      stroke-linejoin:round;
-    }}
-
-    .details-container{{
-      background:#f8f9fa;color:#000;padding:10px;border-radius:10px;text-align:right;
-      border:1px solid #ddd;
-    }}
+    }
+    .toolbar .btn{
+      background:var(--card);
+      border:1px solid #e5e7eb;
+      padding:8px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      box-shadow: var(--shadow);
+    }
+    .panel{
+      margin:10px 18px 24px;
+      background:var(--card);
+      border:1px solid #e5e7eb;
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+    }
+    #timeline{
+      height:360px;
+      border-radius: var(--radius);
+    }
+    .legend{
+      display:flex;
+      gap:10px;
+      padding:10px 14px 14px;
+      flex-wrap:wrap;
+      border-top:1px dashed #e5e7eb;
+      font-size:14px;
+      color:#374151;
+    }
+    .dot{
+      display:inline-block;
+      inline-size:12px;
+      block-size:12px;
+      border-radius:99px;
+      margin-inline-end:6px;
+      vertical-align:middle;
+    }
+    /* טבלת משימות */
+    .table-wrap{
+      margin:0 18px 60px;
+      background:var(--card);
+      border:1px solid #e5e7eb;
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .table-head{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:14px 16px;
+      border-bottom:1px solid #eef2f7;
+    }
+    .table-head h2{
+      margin:0;
+      font-size:18px;
+      font-weight:800;
+    }
+    .filter-row{
+      padding:10px 16px;
+      border-bottom:1px dashed #eef2f7;
+      display:flex;
+      gap:16px;
+      flex-wrap:wrap;
+      align-items:center;
+      color:#374151;
+      font-size:14px;
+    }
+    table{
+      width:100%;
+      border-collapse:separate;
+      border-spacing:0;
+      font-size:14px;
+    }
+    thead th{
+      position:sticky;
+      top:0;
+      background:#fafafa;
+      z-index:1;
+      text-align:right;
+      padding:10px 12px;
+      border-bottom:1px solid #e5e7eb;
+      font-weight:700;
+      color:#111827;
+      white-space:nowrap;
+    }
+    tbody td{
+      padding:10px 12px;
+      border-bottom:1px solid #f1f5f9;
+      vertical-align:top;
+    }
+    tbody tr:hover{background:#fbfdff}
+    .chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:4px 8px;
+      border-radius:999px;
+      background:#fee2e2;
+      color:#b91c1c;
+      font-weight:600;
+      font-size:12px;
+      line-height:1;
+    }
+    .chip .dot{margin:0}
+    .status{
+      font-weight:700;
+      padding:4px 8px;
+      border-radius:8px;
+      display:inline-block;
+    }
+    .s-done{background:#e8faf1;color:#0f766e}
+    .s-plan{background:#eef2ff;color:#4338ca}
+    .s-progress{background:#fff7ed;color:#b45309}
+    .count-badge{
+      display:inline-block;
+      background:#f3f4f6;
+      color:#111827;
+      border-radius:10px;
+      padding:2px 6px;
+      font-weight:700;
+      margin-inline-start:6px;
+    }
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+    .actions a{
+      text-decoration:none;
+      font-weight:700;
+      color:var(--accent);
+      margin-inline-start:10px;
+    }
+    /* התאמות vis */
+    .vis-timeline{
+      border:none !important;
+      border-radius:var(--radius);
+    }
+    .vis-item .vis-item-content{
+      padding:6px 10px;
+      font-weight:700;
+    }
   </style>
 </head>
 <body>
-<header>
-  <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
-    <div class="d-flex align-items-center gap-3">
-      <img src="logo.png" alt="לוגו" style="height:60px;">
-      <div>
-        <h1 class="h4 m-0">📘 בית ספר אלנג'אח — Rahat (שכבה י׳)</h1>
-        <div class="legend mt-2">
-          <span><i class="lg-p"></i> פדגוגי</span>
-          <span><i class="lg-k"></i> קהילתי</span>
-          <span><i class="lg-t"></i> טכנולוגי</span>
-          <span><i class="lg-m"></i> מוסדי</span>
-          <span><i class="lg-h"></i> חברתי</span>
-        </div>
-      </div>
+  <header>
+    <h1>לוח גאנט — בית הספר (2025–2026)</h1>
+    <div class="toolbar">
+      <button class="btn" id="zoomIn">התקרב</button>
+      <button class="btn" id="zoomOut">התרחק</button>
+      <button class="btn" id="fitAll">התאם לכל הטווח</button>
+      <span class="muted small">הצגה מימין לשמאל · חודשים בעברית</span>
     </div>
-  </div>
-</header>
+  </header>
 
-<main class="container pb-5">
-  <div class="card">
-    <div class="card-body" style="overflow-x:auto;">
-      <div id="gantt" style="min-width:1100px;"></div>
+  <section class="panel">
+    <div id="timeline"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="table-wrap">
+    <div class="table-head">
+      <h2>טבלת משימות</h2>
+      <div class="muted small">מקור נתונים זהה ללוח הגאנט</div>
     </div>
-  </div>
-</main>
 
-<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
-<script>
-  // כל המשימות שלך (מוטמע בפנים)
-  const inlineData = {json.dumps(tasks, ensure_ascii=False, indent=2)};
+    <div class="filter-row">
+      סינון לפי תחום:
+      <label><input type="checkbox" class="domain-filter" value="פדגוגי" checked> פדגוגי</label>
+      <label><input type="checkbox" class="domain-filter" value="קהילתי" checked> קהילתי</label>
+      <label><input type="checkbox" class="domain-filter" value="טכנולוגי" checked> טכנולוגי</label>
+      <label><input type="checkbox" class="domain-filter" value="מוסדי" checked> מוסדי</label>
+      <label><input type="checkbox" class="domain-filter" value="חברתי" checked> חברתי</label>
+    </div>
 
-  function normalizeDate(dateStr){{
-    if(!dateStr) return "";
-    if(/^\\d{{4}}-\\d{{2}}-\\d{{2}}$/.test(dateStr)) return dateStr;
-    const d = new Date(dateStr);
-    if(!isNaN(d)){{
-      const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), da=String(d.getDate()).padStart(2,"0");
-      return `${{y}}-${{m}}-${{da}}`;
-    }}
-    const m = String(dateStr).match(/^(\\d{{1,2}})[\\/\\.-](\\d{{1,2}})[\\/\\.-](\\d{{2,4}})$/);
-    if(m){{
-      const da=m[1].padStart(2,"0"), mo=m[2].padStart(2,"0"), y=m[3].length===2?("20"+m[3]):m[3];
-      return `${{y}}-${{mo}}-${{da}}`;
-    }}
-    return String(dateStr);
-  }}
+    <div style="max-height:520px; overflow:auto;">
+      <table id="tasksTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>תחום</th>
+            <th>פעולה</th>
+            <th>התחלה</th>
+            <th>סיום</th>
+            <th>סטטוס</th>
+            <th>ת״ל</th>
+            <th>פעולות</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
 
-  function normalizeTask(t){{
-    return {{
-      id:String(t.id),
-      domain:t.domain,
-      name:t.name,
-      start:normalizeDate(t.start),
-      end:normalizeDate(t.end),
-      progress:Number(t.progress||0)
-    }};
-  }}
+  <script>
+    // ====== הגדרות תחומים (צבעים ותוויות) ======
+    const DOMAIN_COLORS = {
+      "פדגוגי": "#ef4444",
+      "קהילתי": "#22c55e",
+      "טכנולוגי": "#3b82f6",
+      "מוסדי": "#a855f7",
+      "חברתי": "#f59e0b"
+    };
 
-  function monthsToHebrew(){{
-    const engToHe={{"January":"ינואר","February":"פברואר","March":"מרץ","April":"אפריל","May":"מאי","June":"יוני",
-                    "July":"יולי","August":"אוגוסט","September":"ספטמבר","October":"אוקטובר","November":"נובמבר","December":"דצמבר"}};
-    document.querySelectorAll("#gantt .upper-text").forEach(el=>{{
-      const txt=(el.textContent||"").trim();
-      if(engToHe[txt]) el.textContent=engToHe[txt];
-    }});
-  }}
+    // ====== קבוצות לציר ה-Y (לפי תחום) ======
+    const groupsData = new vis.DataSet(Object.keys(DOMAIN_COLORS).map((name, i) => ({
+      id: name,
+      content: name
+    })));
 
-  function render(){{
-    const el=document.getElementById('gantt');
-    if(!Array.isArray(inlineData) || !inlineData.length){{
-      el.innerHTML="<p class='text-center text-warning p-4'>אין נתונים</p>";
-      return;
-    }}
-    const gantt = new Gantt("#gantt", inlineData.map(normalizeTask), {{
-      view_mode:"Month",
-      custom_popup_html:task=>{{
-        return `<div class="details-container">
-          <div class="fw-bold">${{task.name}}</div>
-          <div>תחום: ${{task.domain||'-'}}</div>
-          <div>תאריכים: ${{task.start}} → ${{task.end}}</div>
-          <div>התקדמות: ${{task.progress??0}}%</div>
-        </div>`;
-      }}
-    }});
-    // טווח קבוע 2025–2026, בלי היפוך
-    gantt.gantt_start = new Date("2025-01-01");
-    gantt.gantt_end   = new Date("2026-12-31");
-    gantt.setup_dates();
-    gantt.render();
+    // ====== פריטי גאנט (ערוך/הוסף כרצונך) ======
+    // שמור IDs ייחודיים. start/end בפורמט ISO.
+    const itemsData = new vis.DataSet([
+      // פדגוגי
+      { id: 1,  group: "פדגוגי",  content: "סדנת פתיחה לצוות והצגת חזון", start:"2025-09-05", end:"2025-09-10", title:"משך: 6 ימים" },
+      { id: 2,  group: "פדגוגי",  content: "יישום PBL בשיעורים",          start:"2025-10-15", end:"2025-11-20", title:"התנסות רשמית" },
+      { id: 3,  group: "פדגוגי",  content: "הדרכת צוותי מקצוע ב-PBL",      start:"2026-05-10", end:"2026-05-20" },
 
-    // חודשים בעברית
-    monthsToHebrew();
-  }}
+      // טכנולוגי
+      { id: 4,  group: "טכנולוגי", content: "שדרוג ציוד מעבדות",            start:"2026-06-01", end:"2026-06-20" },
+      { id: 5,  group: "טכנולוגי", content: "תערוכת חדשנות בין-מגמות",      start:"2026-03-15", end:"2026-03-31" },
 
-  document.addEventListener("DOMContentLoaded", render);
-</script>
+      // קהילתי
+      { id: 6,  group: "קהילתי",  content: "יום קהילה וחשיפה לתעשייה",     start:"2026-02-15", end:"2026-02-20" },
+      { id: 7,  group: "קהילתי",  content: "פעילות העצמה לנוער",           start:"2026-02-20", end:"2026-03-07" },
+
+      // מוסדי
+      { id: 8,  group: "מוסדי",   content: "השקת תחנת רדיו בית ספרית",     start:"2025-11-01", end:"2025-11-30" },
+      { id: 9,  group: "מוסדי",   content: "סיכום רבעון ראשון",            start:"2025-12-01", end:"2025-12-10" },
+      { id:10,  group: "מוסדי",   content: "הפקת דו\"ח ביצועים שנתי",       start:"2026-01-20", end:"2026-01-25" },
+      { id:11,  group: "מוסדי",   content: "הפקת דו\"ח מסכם שנתי",          start:"2026-05-01", end:"2026-05-10" },
+
+      // חברתי
+      { id:12,  group: "חברתי",   content: "סדנאות SEL ואורח חיים",        start:"2025-12-15", end:"2026-01-15" },
+      { id:13,  group: "חברתי",   content: "יום שיא קהילתי",                start:"2026-04-10", end:"2026-04-15" },
+
+      // אירועים נוספים (דומים לתצלום)
+      { id:14,  group: "פדגוגי",  content: "סדנת חדשנות פדגוגית",          start:"2026-01-10", end:"2026-01-15" },
+      { id:15,  group: "קהילתי",  content: "הפקת דוח בקרים שוטף",          start:"2026-02-01", end:"2026-02-05" },
+      { id:16,  group: "מוסדי",   content: "יום הורים שכבה י\"ב",          start:"2026-05-20", end:"2026-05-25" }
+    ]);
+
+    // ====== יצירת הלג'נד ======
+    const legend = document.getElementById('legend');
+    Object.entries(DOMAIN_COLORS).forEach(([name, color])=>{
+      const span = document.createElement('span');
+      span.innerHTML = `<span class="dot" style="background:${color}"></span>${name}`;
+      legend.appendChild(span);
+    });
+
+    // ====== יצירת ציר הזמן ======
+    const container = document.getElementById('timeline');
+
+    // עיצוב פריטי הציר לפי צבע התחום
+    function itemTemplate(item, element, data){
+      const color = DOMAIN_COLORS[item.group] || '#999';
+      element.style.background = color;
+      element.style.borderColor = color;
+      element.style.color = '#fff';
+      element.title = item.title || item.content;
+      return element;
+    }
+
+    const options = {
+      locale: 'he',             // חודש/יום בעברית
+      orientation: 'top',       // ציר בחלק העליון
+      rtl: true,                // מימין לשמאל
+      stack: true,
+      maxHeight: 360,
+      zoomMin: 1000 * 60 * 60 * 24 * 3,         // 3 ימים
+      zoomMax: 1000 * 60 * 60 * 24 * 366 * 3,   // עד ~3 שנים
+      start: new Date('2025-09-01'),
+      end:   new Date('2026-08-31'),
+      editable: false,
+      margin: {item:{horizontal:6, vertical:8}},
+      template: function(item, element){
+        return itemTemplate(item, element, item);
+      },
+      groupOrder: (a,b)=> a.id.localeCompare(b.id, 'he')
+    };
+
+    const timeline = new vis.Timeline(container, itemsData, groupsData, options);
+
+    // ====== שליטה בזום ======
+    const ZOOM_STEP = 0.6;
+    function timelineRange(){
+      const range = timeline.getWindow();
+      return {start: range.start.valueOf(), end: range.end.valueOf()};
+    }
+    function setRange(start, end){ timeline.setWindow(start, end, {animation: {duration:400}}); }
+
+    document.getElementById('zoomIn').onclick = ()=>{
+      const {start, end} = timelineRange();
+      const interval = end - start;
+      const newInterval = interval * ZOOM_STEP;
+      const center = start + interval/2;
+      setRange(center - newInterval/2, center + newInterval/2);
+    };
+    document.getElementById('zoomOut').onclick = ()=>{
+      const {start, end} = timelineRange();
+      const interval = end - start;
+      const newInterval = interval / ZOOM_STEP;
+      const center = start + interval/2;
+      setRange(center - newInterval/2, center + newInterval/2);
+    };
+    document.getElementById('fitAll').onclick = ()=>{
+      setRange(new Date('2025-09-01'), new Date('2026-08-31'));
+    };
+
+    // ====== טבלת משימות (אותו מקור) ======
+    const tableBody = document.querySelector('#tasksTable tbody');
+
+    // נתוני "סטטוס" לדוגמה — ניתן לשנות לכל משימה ע"י מפה
+    const statusMap = {
+      1:'הושלם', 2:'בתכנון', 3:'בהתקדמות', 4:'בתכנון',5:'בתכנון',
+      6:'בתכנון',7:'בתכנון',8:'בהתקדמות',9:'הושלם',10:'בתכנון',
+      11:'בתכנון',12:'בהתקדמות',13:'בתכנון',14:'בתכנון',15:'בתכנון',16:'בתכנון'
+    };
+    function statusBadge(s){
+      const map = {
+        'הושלם':'s-done',
+        'בתכנון':'s-plan',
+        'בהתקדמות':'s-progress'
+      };
+      return `<span class="status ${map[s]||'s-plan'}">${s}</span>`;
+    }
+
+    // פונקציית עזר להצגת תאריך בפורמט ישראלי
+    const fmtDate = (d)=> new Date(d).toLocaleDateString('he-IL', {year:'numeric', month:'2-digit', day:'2-digit'});
+
+    function renderTable(filterDomains){
+      tableBody.innerHTML = '';
+      // מיון לפי התחלה
+      const sorted = itemsData.get().sort((a,b)=> new Date(a.start)-new Date(b.start));
+      let idx = 1;
+      for(const item of sorted){
+        if(filterDomains && !filterDomains.has(item.group)) continue;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${idx}</td>
+          <td>
+            <span class="chip"><span class="dot" style="background:${DOMAIN_COLORS[item.group]}"></span>${item.group}</span>
+          </td>
+          <td><strong>${item.content}</strong></td>
+          <td>${fmtDate(item.start)}</td>
+          <td>${fmtDate(item.end)}</td>
+          <td>${statusBadge(statusMap[item.id] || 'בתכנון')}</td>
+          <td class="muted">—</td>
+          <td class="actions">
+            <a href="#!" onclick="timeline.focus(${item.id});return false;">הצג בגאנט</a>
+          </td>
+        `;
+        tableBody.appendChild(tr);
+        idx++;
+      }
+    }
+
+    // רינדור ראשון
+    renderTable();
+
+    // סינון לפי תחומים (מסננים גם את לוח הגאנט)
+    const filterInputs = document.querySelectorAll('.domain-filter');
+    function rebuildFilter(){
+      const selected = new Set([...filterInputs].filter(i=>i.checked).map(i=>i.value));
+      // סינון בגאנט
+      const visibleIds = itemsData.get().filter(it=>selected.has(it.group)).map(it=>it.id);
+      timeline.setItems(new vis.DataSet(itemsData.get({filter: it=>selected.has(it.group)})));
+      // לסדר את הקבוצות כרגיל (מוצגות כולן; זה בסדר גם אם חלק ריקות)
+      timeline.setGroups(groupsData);
+      renderTable(selected);
+    }
+    filterInputs.forEach(inp=>inp.addEventListener('change', rebuildFilter));
+  </script>
 </body>
 </html>
-"""
-
-out = Path("/mnt/data/index-hebrew-no-flip.html")
-out.write_text(html, encoding="utf-8")
-print(str(out))
