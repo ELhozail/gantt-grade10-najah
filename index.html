@@ -29,7 +29,11 @@
     .gantt .bar-חברתי{ fill: var(--hevra); }
     .gantt .today-highlight line{ stroke: var(--brand); stroke-width: 2; stroke-dasharray: 4 4; }
     .details-container{background:var(--panel-2); color:var(--text); border:1px solid rgba(255,255,255,.08);
-      border-radius:12px; padding:10px 12px; box-shadow:0 8px 24px rgba(0,0,0,.4);}
+      border-radius:12px; padding:10px 12px; box-shadow:0 8px 24px rgba(0,0,0,.4); text-align:right;}
+    /* RTL בתוך ה-SVG של הגאנט */
+    #gantt text{direction: rtl; unicode-bidi: bidi-override;}
+    /* יישור כללי לימין */
+    header, main, .card-body { text-align: right; }
   </style>
 </head>
 <body>
@@ -58,6 +62,7 @@
 <main class="container pb-5">
   <div class="card">
     <div class="card-body" style="overflow-x:auto;">
+      <div id="diag" class="text-muted small mb-2"></div>
       <div id="gantt" style="min-width:1100px;"></div>
     </div>
   </div>
@@ -66,6 +71,9 @@
 <!-- Frappe Gantt JS -->
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
 <script>
+  const REPO_USER = "elhozail";
+  const REPO_NAME = "gantt-grade10-najah";
+
   let TASKS = [];
 
   function normalizeTask(t){
@@ -77,6 +85,24 @@
       end: t.end,
       progress: Number(t.progress || 0),
     };
+  }
+
+  function hebrewizeMonths(){
+    // החלפת שמות חודשים באנגלית לכיתוב עברי
+    const engToHe = {
+      "January":"ינואר","February":"פברואר","March":"מרץ","April":"אפריל",
+      "May":"מאי","June":"יוני","July":"יולי","August":"אוגוסט",
+      "September":"ספטמבר","October":"אוקטובר","November":"נובמבר","December":"דצמבר"
+    };
+    // תוויות עליונות (חודשים/שנים)
+    document.querySelectorAll("#gantt .upper-text").forEach(el=>{
+      const txt = (el.textContent||"").trim();
+      if(engToHe[txt]) el.textContent = engToHe[txt];
+    });
+    // ליישור לימין — להעביר עיגון טקסט לצד ימין
+    document.querySelectorAll("#gantt text").forEach(el=>{
+      el.setAttribute("text-anchor","end");
+    });
   }
 
   function render(){
@@ -103,6 +129,8 @@
         }
       }
     );
+    // התאמות RTL וחודשים בעברית
+    hebrewizeMonths();
     markToday();
   }
 
@@ -146,36 +174,40 @@
   }
   document.getElementById('btn-export').addEventListener('click', exportCSV);
 
-  // -------- טעינת נתונים עם Fallback ל-RAW של GitHub + ביטול קאש --------
+  async function tryFetch(url){
+    const r = await fetch(url, {cache:"no-store"});
+    if(!r.ok){
+      const txt = await r.text().catch(()=>"(no body)");
+      throw new Error(`[${r.status}] ${url} :: ${txt.slice(0,200)}`);
+    }
+    return r.json();
+  }
+
   async function loadData(){
-    const ORIGIN_JSON = "data.json?v=" + Date.now(); // מונע קאש
-    const RAW_JSON = "https://raw.githubusercontent.com/elhozail/gantt-grade10-najah/main/data.json?v=" + Date.now();
-
-    // ניסיון ראשון: מהאתר עצמו (GitHub Pages)
-    try {
-      const r = await fetch(ORIGIN_JSON, {cache:"no-store"});
-      if (!r.ok) throw new Error("HTTP " + r.status);
-      const data = await r.json();
-      TASKS = data.map(normalizeTask);
-      render();
-      return;
-    } catch (e) {
-      console.error("טעינת data.json מ-Pages נכשלה:", e);
+    const diag = document.getElementById("diag");
+    const urls = [
+      "./data.json?v="+Date.now(), // מהאתר עצמו (Pages)
+      `https://${REPO_USER}.github.io/${REPO_NAME}/data.json?v=${Date.now()}`, // נתיב מוחלט
+      `https://raw.githubusercontent.com/${REPO_USER}/${REPO_NAME}/main/data.json?v=${Date.now()}`, // RAW
+      `https://github.com/${REPO_USER}/${REPO_NAME}/raw/main/data.json?raw=1&v=${Date.now()}` // גיבוי נוסף
+    ];
+    let lastErr = null;
+    for(const u of urls){
+      try{
+        diag.textContent = "טוען: " + u;
+        const data = await tryFetch(u);
+        TASKS = data.map(normalizeTask);
+        diag.textContent = "נטען בהצלחה מ: " + u;
+        render();
+        return;
+      }catch(err){
+        console.error(err);
+        lastErr = err.message;
+      }
     }
-
-    // ניסיון שני: RAW GitHub (גיבוי)
-    try {
-      const r2 = await fetch(RAW_JSON, {cache:"no-store"});
-      if (!r2.ok) throw new Error("HTTP " + r2.status);
-      const data2 = await r2.json();
-      TASKS = data2.map(normalizeTask);
-      render();
-      return;
-    } catch (e2) {
-      console.error("טעינת RAW GitHub נכשלה:", e2);
-      document.getElementById('gantt').innerHTML =
-        "<p class='text-danger p-4'>בעיה בטעינת הנתונים. ודא ש־data.json קיים בשורש הריפו ושה־Pages פעיל על main/root.</p>";
-    }
+    document.getElementById('gantt').innerHTML =
+      "<div class='p-3 text-danger'>בעיה בטעינת data.json<br><small>"+(lastErr||"")+"</small></div>";
+    diag.textContent = "שגיאה: ודא ש־data.json קיים בשורש הריפו ושה־Pages פעיל על main/root.";
   }
 
   document.addEventListener("DOMContentLoaded", loadData);
