@@ -11,29 +11,49 @@
 
   <style>
     :root{
-      --bg:#0d0f17; --panel:#1a1c29; --text:#f1f1f1; --muted:#aaa; --brand:#7c6cff;
-      --pedagogi:#ef4b6c; --kehila:#1fb6d5; --tech:#ff9800; --mosdi:#43a047; --hevra:#9e9e9e;
+      --bg:#0d0f17; --panel:#1a1c29; --text:#f6f7fb; --muted:#c7c9d6;
+      --pedagogi:#ef4b6c; --kehila:#06b6d4; --tech:#ff9800; --mosdi:#43a047; --hevra:#9e9e9e;
+      --grid:#2a2d3d; --grid-2:#222536; --header-grad:linear-gradient(120deg,#151726,#1e2133,#2b2e44);
     }
     body{background:var(--bg);color:var(--text);}
-    header{background:linear-gradient(120deg,#151726,#1e2133,#2b2e44);padding:1rem 0;margin-bottom:1rem;}
-    .card{background:var(--panel);border-radius:16px;border:1px solid rgba(255,255,255,.1);}
-    .legend span{margin-inline-end:1rem;color:var(--muted);font-size:.9rem;}
+    header{background:var(--header-grad);padding:1rem 0;margin-bottom:1rem;}
+    .card{background:var(--panel);border-radius:16px;border:1px solid rgba(255,255,255,.08);}
+
+    .legend span{margin-inline-end:1rem;color:var(--muted);font-size:.9rem}
     .legend i{display:inline-block;width:14px;height:14px;border-radius:3px;margin-left:4px;}
     .lg-p{background:var(--pedagogi);} .lg-k{background:var(--kehila);}
     .lg-t{background:var(--tech);} .lg-m{background:var(--mosdi);} .lg-h{background:var(--hevra);}
+
     .gantt .bar-פדגוגי{fill:var(--pedagogi);}
     .gantt .bar-קהילתי{fill:var(--kehila);}
     .gantt .bar-טכנולוגי{fill:var(--tech);}
     .gantt .bar-מוסדי{fill:var(--mosdi);}
     .gantt .bar-חברתי{fill:var(--hevra);}
-    .details-container{background:#22263a;color:var(--text);padding:10px;border-radius:8px;text-align:right;}
-    #gantt text{direction:rtl;unicode-bidi:bidi-override;text-anchor:end;fill:var(--text);}
 
-    /* --- טקסט בתוך המשימות --- */
-    .gantt .bar text {
-      fill: #ffffff !important;   /* צבע לבן */
-      font-weight: 700;           /* מודגש */
-      font-size: 14px;            /* גדול יותר */
+    .gantt .grid-row rect{fill:var(--grid)}
+    .gantt .grid-row:nth-child(even) rect{fill:var(--grid-2)}
+    .gantt .grid-header rect{fill:#1d2030}
+    .gantt .grid-header .upper-text,
+    .gantt .grid-header .lower-text{fill:#ffffff;font-weight:700}
+    .gantt .lower-text{font-size:13px}
+    .gantt .upper-text{font-size:14px}
+
+    #gantt text{direction:rtl;unicode-bidi:bidi-override;text-anchor:end}
+
+    /* טקסט על ה-bars */
+    .gantt .bar text{
+      fill:#ffffff !important;
+      font-weight:800;
+      font-size:14px;
+      paint-order:stroke fill;
+      stroke:rgba(0,0,0,.7);
+      stroke-width:3px;
+      stroke-linejoin:round;
+    }
+
+    .details-container{
+      background:#22263a;color:var(--text);padding:10px;border-radius:10px;text-align:right;
+      border:1px solid rgba(255,255,255,.08)
     }
   </style>
 </head>
@@ -41,9 +61,9 @@
 <header>
   <div class="container d-flex justify-content-between align-items-center flex-wrap gap-3">
     <div class="d-flex align-items-center gap-3">
-      <img src="logo.png" alt="לוגו" style="height:50px;">
+      <img src="logo.png" alt="לוגו" style="height:60px;">
       <div>
-        <h1 class="h4 m-0">📘 אלנג'אח – رهط (שכבה י׳)</h1>
+        <h1 class="h4 m-0">📘 בית ספר אלנג'אח – Rahat (שכבה י׳)</h1>
         <div class="legend">
           <span><i class="lg-p"></i> פדגוגי</span>
           <span><i class="lg-k"></i> קהילתי</span>
@@ -66,35 +86,30 @@
 
 <script src="https://cdn.jsdelivr.net/npm/frappe-gantt@0.6.1/dist/frappe-gantt.min.js"></script>
 <script>
-  // ===== הנתונים שלך מתוך data.json (מוטמע בפנים) =====
   const inlineData = [
     {"id":"1","domain":"פדגוגי","name":"סדנת פתיחת שנה","start":"2025-09-05","end":"2025-09-10","progress":100},
     {"id":"2","domain":"חברתי","name":"פעילות גיבוש שכבת י׳","start":"2025-10-01","end":"2025-10-05","progress":50}
-    // כאן נכנסים כל שאר הנתונים המלאים שלך מה-data.json
+    // כאן כל שאר המשימות מה-data.json
   ];
 
-  // המרת תאריכים לפורמט YYYY-MM-DD
-  function normalizeDate(dateStr) {
-    if (!dateStr) return "";
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
+  function normalizeDate(dateStr){
+    if(!dateStr) return "";
+    if(/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return dateStr;
     const d = new Date(dateStr);
-    if (!isNaN(d)) {
-      const y = d.getFullYear();
-      const m = String(d.getMonth()+1).padStart(2,"0");
-      const da = String(d.getDate()).padStart(2,"0");
-      return `${y}-${m}-${da}`;
+    if(!isNaN(d)){
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
     }
     return String(dateStr);
   }
 
   function normalizeTask(t){
     return {
-      id: String(t.id),
-      domain: t.domain,
-      name: t.name,
-      start: normalizeDate(t.start),
-      end: normalizeDate(t.end),
-      progress: Number(t.progress || 0)
+      id:String(t.id),
+      domain:t.domain,
+      name:t.name,
+      start:normalizeDate(t.start),
+      end:normalizeDate(t.end),
+      progress:Number(t.progress||0)
     };
   }
 
