@@ -394,7 +394,7 @@
           <td>${statusBadge(statusMap[item.id] || 'בתכנון')}</td>
           <td class="muted">—</td>
           <td class="actions">
-            <a href="#!" onclick="timeline.focus(${item.id});return false;">הצג בגאנט</a>
+            <a href="#!" onclick="focusOnItem(${item.id});return false;">הצג בגאנט</a>
           </td>
         `;
         tableBody.appendChild(tr);
@@ -405,16 +405,47 @@
     // רינדור ראשון
     renderTable();
 
+    // פונקציה להתמקדות בפריט (עם טיפול בשגיאות)
+    let currentFilter = null;
+    
+    function focusOnItem(itemId){
+      const item = itemsData.get(itemId);
+      if(!item) return;
+      
+      // אם הפריט מסונן, הצג את התחום שלו
+      if(currentFilter && !currentFilter.has(item.group)){
+        // הוסף את התחום לסינון
+        filterInputs.forEach(inp=>{
+          if(inp.value === item.group) inp.checked = true;
+        });
+        rebuildFilter();
+      }
+      
+      // התמקד בפריט
+      setTimeout(()=>timeline.focus(itemId, {animation: {duration: 500}}), 100);
+    }
+    window.focusOnItem = focusOnItem;
+
     // סינון לפי תחומים (מסננים גם את לוח הגאנט)
     const filterInputs = document.querySelectorAll('.domain-filter');
+    
     function rebuildFilter(){
       const selected = new Set([...filterInputs].filter(i=>i.checked).map(i=>i.value));
-      // סינון בגאנט
-      const visibleIds = itemsData.get().filter(it=>selected.has(it.group)).map(it=>it.id);
-      timeline.setItems(new vis.DataSet(itemsData.get({filter: it=>selected.has(it.group)})));
-      // לסדר את הקבוצות כרגיל (מוצגות כולן; זה בסדר גם אם חלק ריקות)
-      timeline.setGroups(groupsData);
-      renderTable(selected);
+      
+      // שמירת הסינון הנוכחי
+      currentFilter = selected.size === Object.keys(DOMAIN_COLORS).length ? null : selected;
+      
+      // סינון בגאנט - שימוש באותו DataSet עם מסנן דינמי
+      if(currentFilter){
+        const filteredGroups = new vis.DataSet(
+          [...currentFilter].map(name => ({id: name, content: name}))
+        );
+        timeline.setGroups(filteredGroups);
+      } else {
+        timeline.setGroups(groupsData);
+      }
+      
+      renderTable(currentFilter);
     }
     filterInputs.forEach(inp=>inp.addEventListener('change', rebuildFilter));
   </script>
