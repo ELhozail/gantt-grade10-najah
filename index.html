@@ -3,199 +3,136 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>לוח גאנט — בית הספר</title>
+  <title>לוח גאנט — עברית (2025–2026)</title>
 
+  <!-- vis-timeline CDN -->
   <link rel="stylesheet" href="https://unpkg.com/vis-timeline@7.7.0/styles/vis-timeline-graph2d.min.css">
   <script src="https://unpkg.com/vis-data@7.1.4/peer/umd/vis-data.min.js"></script>
   <script src="https://unpkg.com/vis-timeline@7.7.0/peer/umd/vis-timeline-graph2d.min.js"></script>
+  <!-- Moment with locales for Hebrew month/day names on the axis -->
+  <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/min/moment-with-locales.min.js"></script>
 
   <style>
     :root{
       --bg:#f7f7f9;
-      --card:#fff;
+      --card:#ffffff;
       --ink:#111;
       --muted:#6b7280;
       --accent:#0ea5e9;
+      --chip:#ef4444;
       --radius:16px;
       --shadow:0 8px 24px rgba(0,0,0,.08);
     }
-    *{box-sizing:border-box;margin:0;padding:0}
+    *{box-sizing:border-box}
     body{
+      margin:0;
       background:var(--bg);
       color:var(--ink);
-      font-family:"Heebo","Rubik","Assistant",sans-serif;
-      line-height:1.6;
-      padding:20px;
+      font-family: "Heebo", "Rubik", "Assistant", system-ui, -apple-system, Segoe UI, Arial, sans-serif;
+      line-height:1.45;
+      direction: rtl;
+      text-align:right;
     }
+    header{ padding:22px 18px 6px; }
     h1{
-      font-size:28px;
-      margin-bottom:20px;
+      margin:0 0 8px;
+      font-size: clamp(22px, 3vw, 34px);
       font-weight:800;
+      letter-spacing:.2px;
     }
     .toolbar{
-      display:flex;
-      gap:10px;
-      margin-bottom:20px;
-      flex-wrap:wrap;
+      display:flex; flex-wrap:wrap; gap:8px; align-items:center; color:var(--muted); font-size:14px;
     }
-    .btn{
-      background:var(--card);
-      border:1px solid #e5e7eb;
-      padding:10px 16px;
-      border-radius:12px;
-      cursor:pointer;
-      font-weight:600;
-      transition:all 0.2s;
+    .toolbar .btn{
+      background:var(--card); border:1px solid #e5e7eb; padding:8px 12px; border-radius:12px; cursor:pointer; box-shadow: var(--shadow); transition: all 0.2s;
     }
-    .btn:hover{
-      background:#f3f4f6;
-      transform:translateY(-1px);
-    }
-    .panel{
-      background:var(--card);
-      border:1px solid #e5e7eb;
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      margin-bottom:30px;
-      overflow:hidden;
-    }
-    #timeline{
-      height:450px;
-      width:100%;
-    }
-    .legend{
-      display:flex;
-      gap:15px;
-      padding:15px;
-      border-top:1px dashed #e5e7eb;
-      flex-wrap:wrap;
-    }
-    .legend-item{
-      display:flex;
-      align-items:center;
-      gap:8px;
-    }
-    .dot{
-      width:14px;
-      height:14px;
-      border-radius:50%;
-    }
-    .filter-row{
-      padding:15px;
-      border-bottom:1px dashed #e5e7eb;
-      display:flex;
-      gap:20px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
-    table{
-      width:100%;
-      border-collapse:collapse;
-    }
-    th,td{
-      padding:12px;
-      text-align:right;
-      border-bottom:1px solid #f1f5f9;
-    }
-    th{
-      background:#fafafa;
-      font-weight:700;
-      position:sticky;
-      top:0;
-      z-index:1;
-    }
-    tr:hover{
-      background:#fbfdff;
-    }
-    .chip{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:5px 10px;
-      border-radius:20px;
-      font-size:13px;
-      font-weight:600;
-    }
-    .progress-bar{
-      width:120px;
-      height:8px;
-      background:#e5e7eb;
-      border-radius:10px;
-      overflow:hidden;
-    }
-    .progress-fill{
-      height:100%;
-      background:#22c55e;
-      transition:width 0.3s;
-    }
-    .link{
-      color:var(--accent);
-      cursor:pointer;
-      font-weight:600;
-      text-decoration:none;
-    }
-    .link:hover{
-      text-decoration:underline;
-    }
-    .table-container{
-      max-height:500px;
-      overflow:auto;
-    }
-    .vis-item .vis-item-content{
-      padding:8px 12px;
-      font-weight:700;
-      white-space:nowrap;
-    }
+    .toolbar .btn:hover{ background:#f3f4f6; transform: translateY(-1px); }
+    .panel{ margin:10px 18px 24px; background:var(--card); border:1px solid #e5e7eb; border-radius:var(--radius); box-shadow: var(--shadow); }
+    #timeline{ height:440px; border-radius: var(--radius); }
+    .legend{ display:flex; gap:10px; padding:10px 14px 14px; flex-wrap:wrap; border-top:1px dashed #e5e7eb; font-size:14px; color:#374151; }
+    .dot{ display:inline-block; inline-size:12px; block-size:12px; border-radius:99px; margin-inline-end:6px; vertical-align:middle; }
+    .table-wrap{ margin:0 18px 60px; background:var(--card); border:1px solid #e5e7eb; border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; }
+    .table-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid #eef2f7; }
+    .table-head h2{ margin:0; font-size:18px; font-weight:800; }
+    .filter-row{ padding:10px 16px; border-bottom:1px dashed #eef2f7; display:flex; gap:16px; flex-wrap:wrap; align-items:center; color:#374151; font-size:14px; }
+    table{ width:100%; border-collapse:separate; border-spacing:0; font-size:14px; }
+    thead th{ position:sticky; top:0; background:#fafafa; z-index:1; text-align:right; padding:10px 12px; border-bottom:1px solid #e5e7eb; font-weight:700; color:#111827; white-space:nowrap; }
+    tbody td{ padding:10px 12px; border-bottom:1px solid #f1f5f9; vertical-align:top; }
+    tbody tr:hover{background:#fbfdff}
+    .chip{ display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:#fee2e2; color:#b91c1c; font-weight:600; font-size:12px; line-height:1; }
+    .chip .dot{margin:0}
+    .progress-bar{ width:100%; height:8px; background:#e5e7eb; border-radius:999px; overflow:hidden; }
+    .progress-fill{ height:100%; background:#22c55e; border-radius:999px; transition: width 0.3s; }
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+    .actions a{ text-decoration:none; font-weight:700; color:var(--accent); margin-inline-start:10px; cursor:pointer; }
+    .actions a:hover{ text-decoration:underline; }
+    .vis-timeline{ border:none !important; border-radius:var(--radius); }
+    .vis-item .vis-item-content{ padding:6px 10px; font-weight:700; font-size:13px; }
+    .loading{ text-align:center; padding:40px; color:var(--muted); }
+    .today-badge{ margin-inline-start:8px; padding:4px 10px; border-radius:999px; background:#e0f2fe; color:#0369a1; font-weight:700; font-size:12px; }
   </style>
 </head>
 <body>
-  <h1>🗓️ לוח גאנט — בית הספר 2025–2026</h1>
-  
-  <div class="toolbar">
-    <button class="btn" onclick="zoomIn()">🔍 התקרב</button>
-    <button class="btn" onclick="zoomOut()">🔍 התרחק</button>
-    <button class="btn" onclick="fitAll()">📅 התאם הכל</button>
-  </div>
+  <header>
+    <h1>
+      לוח גאנט — בית הספר (2025–2026)
+      <span class="today-badge" id="todayText"></span>
+    </h1>
+    <div class="toolbar">
+      <button class="btn" id="zoomIn">התקרב</button>
+      <button class="btn" id="zoomOut">התרחק</button>
+      <button class="btn" id="fitAll">התאם לכל הטווח</button>
+      <button class="btn" id="goToday">ל"היום"</button>
+      <button class="btn" id="downloadJson">הורד JSON</button>
+      <span class="muted small">הצגה מימין לשמאל · חודשים בעברית</span>
+    </div>
+  </header>
 
-  <div class="panel">
-    <div id="timeline"></div>
+  <section class="panel">
+    <div id="timeline"><div class="loading">טוען נתונים...</div></div>
     <div class="legend" id="legend"></div>
-  </div>
+  </section>
 
-  <div class="panel">
-    <div style="padding:15px;border-bottom:1px solid #e5e7eb">
-      <h2 style="font-size:18px;font-weight:800">📋 טבלת משימות</h2>
+  <section class="table-wrap">
+    <div class="table-head">
+      <h2>טבלת משימות</h2>
+      <div class="muted small">מקור נתונים: data.json</div>
     </div>
-    
+
     <div class="filter-row">
-      <strong>סינון:</strong>
-      <label><input type="checkbox" class="filter" value="פדגוגי" checked> פדגוגי</label>
-      <label><input type="checkbox" class="filter" value="קהילתי" checked> קהילתי</label>
-      <label><input type="checkbox" class="filter" value="טכנולוגי" checked> טכנולוגי</label>
-      <label><input type="checkbox" class="filter" value="מוסדי" checked> מוסדי</label>
-      <label><input type="checkbox" class="filter" value="חברתי" checked> חברתי</label>
+      סינון לפי תחום:
+      <label><input type="checkbox" class="domain-filter" value="פדגוגי" checked> פדגוגי</label>
+      <label><input type="checkbox" class="domain-filter" value="קהילתי" checked> קהילתי</label>
+      <label><input type="checkbox" class="domain-filter" value="טכנולוגי" checked> טכנולוגי</label>
+      <label><input type="checkbox" class="domain-filter" value="מוסדי" checked> מוסדי</label>
+      <label><input type="checkbox" class="domain-filter" value="חברתי" checked> חברתי</label>
     </div>
 
-    <div class="table-container">
-      <table>
+    <div style="max-height:520px; overflow:auto;">
+      <table id="tasksTable">
         <thead>
           <tr>
             <th>#</th>
             <th>תחום</th>
-            <th>משימה</th>
+            <th>פעולה</th>
             <th>התחלה</th>
             <th>סיום</th>
             <th>התקדמות</th>
             <th>פעולות</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody><tr><td colspan="7" class="loading">טוען נתונים...</td></tr></tbody>
       </table>
     </div>
-  </div>
+  </section>
 
   <script>
-    const COLORS = {
+    // ====== Hebrew locale for axis labels ======
+    moment.locale('he');
+
+    // ====== Domain colors ======
+    const DOMAIN_COLORS = {
       "פדגוגי": "#ef4444",
       "קהילתי": "#22c55e",
       "טכנולוגי": "#3b82f6",
@@ -203,187 +140,235 @@
       "חברתי": "#f59e0b"
     };
 
-    const DATA = [
-      {"id":1,"domain":"פדגוגי","name":"סדנת פתיחת שנה","start":"2025-09-01","end":"2025-09-01","progress":100},
-      {"id":2,"domain":"מוסדי","name":"ذكرى المولد النبوي","start":"2025-09-03","end":"2025-09-04","progress":0},
-      {"id":3,"domain":"חברתי","name":"נעלה לירושלים","start":"2025-10-05","end":"2025-10-05","progress":0},
-      {"id":4,"domain":"חברתי","name":"חשיפה למקומות השמה","start":"2025-10-07","end":"2025-10-07","progress":0},
-      {"id":5,"domain":"פדגוגי","name":"امتحانات تصنيف","start":"2025-10-12","end":"2025-10-16","progress":50},
-      {"id":6,"domain":"טכנולוגי","name":"هيتك للعاشر 3","start":"2025-10-27","end":"2025-10-27","progress":0},
-      {"id":7,"domain":"חברתי","name":"انتخاب ممثل صف","start":"2025-10-05","end":"2025-10-05","progress":0},
-      {"id":8,"domain":"קהילתי","name":"פרוייקט להיות אזרח שכבה י'","start":"2025-10-20","end":"2025-10-20","progress":0},
-      {"id":9,"domain":"קהילתי","name":"בחירות מועצת תלמידים","start":"2025-10-22","end":"2025-10-22","progress":0},
-      {"id":10,"domain":"פדגוגי","name":"ישיבת מורים","start":"2025-11-24","end":"2025-11-24","progress":0},
-      {"id":11,"domain":"פדגוגי","name":"מבחן כימיה וגיל הרך","start":"2025-11-30","end":"2025-11-30","progress":0},
-      {"id":12,"domain":"פדגוגי","name":"מבחן אזרחות","start":"2025-12-02","end":"2025-12-02","progress":0},
-      {"id":13,"domain":"פדגוגי","name":"מבחן התמחות","start":"2025-12-04","end":"2025-12-04","progress":0},
-      {"id":14,"domain":"פדגוגי","name":"מבחן מתמטיקה","start":"2025-12-07","end":"2025-12-07","progress":0},
-      {"id":15,"domain":"פדגוגי","name":"מבחן אנגלית","start":"2025-12-09","end":"2025-12-09","progress":0},
-      {"id":16,"domain":"פדגוגי","name":"מבחן דת","start":"2025-12-11","end":"2025-12-11","progress":0},
-      {"id":17,"domain":"פדגוגי","name":"מבחן היסטוריה","start":"2025-12-14","end":"2025-12-14","progress":0},
-      {"id":18,"domain":"פדגוגי","name":"מבחן ערבית","start":"2025-12-16","end":"2025-12-16","progress":0},
-      {"id":19,"domain":"פדגוגי","name":"מבחן עברית","start":"2025-12-18","end":"2025-12-18","progress":0},
-      {"id":20,"domain":"פדגוגי","name":"הזנת ציונים במשוב","start":"2025-12-20","end":"2025-12-20","progress":0},
-      {"id":21,"domain":"קהילתי","name":"ערב הורים","start":"2025-12-22","end":"2025-12-22","progress":0},
-      {"id":22,"domain":"חברתי","name":"חלוקת תעודות","start":"2025-12-23","end":"2025-12-23","progress":0},
-      {"id":23,"domain":"מוסדי","name":"חופשת האביב","start":"2025-12-24","end":"2026-01-05","progress":0}
+    // ====== Date parsing helper ======
+    function parseDate(v){ return (typeof v === 'number') ? new Date(v) : new Date(v); }
+
+    // ====== Inline data (you can later replace with fetch('data.json')) ======
+    const rawData = [
+      {"id":1, "domain":"פדגוגי", "name":"סדנת פתיחת שנה", "start":"2025-09-01", "end":"2025-09-01", "progress":0},
+      {"id":2, "domain":"מוסדי", "name":"ذكرى المولد النبوي", "start":"2025-09-03", "end":"2025-09-04", "progress":0},
+      {"id":3, "domain":"חברתי", "name":"נעלה לירושלים", "start":"2025-10-05", "end":"2025-10-05", "progress":0},
+      {"id":4, "domain":"חברתי", "name":"חשיפה למקומות השמה", "start":"2025-10-07", "end":"2025-10-07", "progress":0},
+      {"id":5, "domain":"פדגוגי", "name":"امتحانات تصنيف", "start":"2025-10-12", "end":"2025-10-16", "progress":0},
+      {"id":6, "domain":"טכנולוגי", "name":"هيتك للعاشر 3", "start":"2025-10-27", "end":"2025-10-27", "progress":0},
+      {"id":7, "domain":"חברתי", "name":"انتخاب ممثل صف", "start":"2025-10-05", "end":"2025-10-05", "progress":0},
+      {"id":8, "domain":"קהילתי", "name":"פרוייקט להיות אזרח שכבה י'", "start":"2025-10-20", "end":"2025-10-20", "progress":0},
+      {"id":9, "domain":"קהילתי", "name":"בחירות מועצת תלמידים", "start":"2025-10-22", "end":"2025-10-22", "progress":0},
+      {"id":10, "domain":"פדגוגי", "name":"ישיבת מורים", "start":"2025-11-24", "end":"2025-11-24", "progress":0},
+      {"id":11, "domain":"פדגוגי", "name":"מבחן כימיה וגיל הרך", "start":"2025-11-30", "end":"2025-11-30", "progress":0},
+      {"id":12, "domain":"פדגוגי", "name":"מבחן אזרחות", "start":"2025-12-02", "end":"2025-12-02", "progress":0},
+      {"id":13, "domain":"פדגוגי", "name":"מבחן התמחות", "start":"2025-12-04", "end":"2025-12-04", "progress":0},
+      {"id":14, "domain":"פדגוגי", "name":"מבחן מתמטיקה", "start":"2025-12-07", "end":"2025-12-07", "progress":0},
+      {"id":15, "domain":"פדגוגי", "name":"מבחן אנגלית", "start":"2025-12-09", "end":"2025-12-09", "progress":0},
+      {"id":16, "domain":"פדגוגי", "name":"מבחן דת", "start":"2025-12-11", "end":"2025-12-11", "progress":0},
+      {"id":17, "domain":"פדגוגי", "name":"מבחן היסטוריה", "start":"2025-12-14", "end":"2025-12-14", "progress":0},
+      {"id":18, "domain":"פדגוגי", "name":"מבחן ערבית", "start":"2025-12-16", "end":"2025-12-16", "progress":0},
+      {"id":19, "domain":"פדגוגי", "name":"מבחן עברית", "start":"2025-12-18", "end":"2025-12-18", "progress":0},
+      {"id":20, "domain":"פדגוגי", "name":"הזנת ציונים במשוב", "start":"2025-12-20", "end":"2025-12-20", "progress":0},
+      {"id":21, "domain":"קהילתי", "name":"ערב הורים", "start":"2025-12-22", "end":"2025-12-22", "progress":0},
+      {"id":22, "domain":"חברתי", "name":"חלוקת תעודות", "start":"2025-12-23", "end":"2025-12-23", "progress":0},
+      {"id":23, "domain":"מוסדי", "name":"חופשת האביב", "start":"2025-12-24", "end":"2026-01-05", "progress":0}
     ];
 
-    function parseDate(d) {
-      return typeof d === 'number' ? new Date(d) : new Date(d);
+    // ====== Convert to vis items (ensure single-day ranges show as bars) ======
+    function toVisItems(data){
+      return data.map(it => {
+        const s = parseDate(it.start);
+        let e = parseDate(it.end);
+        const sameDay = s.toDateString() === e.toDateString();
+        if(sameDay){ // make it a 1-day range
+          e = new Date(e.getTime() + 24*60*60*1000 - 1);
+        }
+        return {
+          id: it.id,
+          group: it.domain,
+          content: it.name,
+          start: s,
+          end: e,
+          title: `${it.name}\nהתקדמות: ${it.progress}%`,
+          progress: it.progress
+        };
+      });
     }
 
-    const items = new vis.DataSet(
-      DATA.map(item => {
-        const s = parseDate(item.start);
-        const e = parseDate(item.end);
-        const isSameDay = s.getTime() === e.getTime();
-        
-        return {
-          id: item.id,
-          group: item.domain,
-          content: item.name,
-          start: s,
-          end: isSameDay ? new Date(e.getTime() + 86400000) : e,
-          title: item.name,
-          type: 'range'
-        };
-      })
-    );
+    const itemsData = new vis.DataSet(toVisItems(rawData));
 
-    const groups = new vis.DataSet(
-      Object.keys(COLORS).map(name => ({id: name, content: name}))
-    );
+    // ====== Groups ======
+    const groupsData = new vis.DataSet(Object.keys(DOMAIN_COLORS).map(name => ({ id: name, content: name })));
 
+    // ====== Legend ======
     const legend = document.getElementById('legend');
-    Object.entries(COLORS).forEach(([name, color]) => {
-      const div = document.createElement('div');
-      div.className = 'legend-item';
-      div.innerHTML = `<span class="dot" style="background:${color}"></span><span>${name}</span>`;
-      legend.appendChild(div);
+    Object.entries(DOMAIN_COLORS).forEach(([name, color])=>{
+      const span = document.createElement('span');
+      span.innerHTML = `<span class="dot" style="background:${color}"></span>${name}`;
+      legend.appendChild(span);
     });
 
-    const timeline = new vis.Timeline(
-      document.getElementById('timeline'),
-      items,
-      groups,
-      {
-        locale: 'he',
-        rtl: true,
-        orientation: 'top',
-        stack: true,
-        zoomMin: 86400000 * 3,
-        zoomMax: 86400000 * 400,
-        start: new Date('2025-09-01'),
-        end: new Date('2026-02-01'),
-        margin: {item: 10},
-        template: (item, el) => {
-          el.style.background = COLORS[item.group];
-          el.style.borderColor = COLORS[item.group];
-          el.style.color = '#fff';
-          return el;
+    // ====== Timeline ======
+    const container = document.getElementById('timeline');
+
+    function itemTemplate(item, element){
+      const color = DOMAIN_COLORS[item.group] || '#999';
+      element.style.background = color;
+      element.style.borderColor = color;
+      element.style.color = '#fff';
+      element.style.borderRadius = '12px';
+      return element;
+    }
+
+    // Current window range
+    const RANGE_START = new Date('2025-09-01');
+    const RANGE_END   = new Date('2026-02-01');
+
+    const options = {
+      locale: 'he',
+      orientation: 'top',
+      rtl: true,
+      stack: true,
+      maxHeight: 440,
+      zoomMin: 1000 * 60 * 60 * 24 * 3,
+      zoomMax: 1000 * 60 * 60 * 24 * 366 * 2,
+      start: RANGE_START,
+      end: RANGE_END,
+      editable: false,
+      margin: { item:{ horizontal:6, vertical:8 } },
+      template: itemTemplate,
+      groupOrder: (a,b)=> a.id.localeCompare(b.id, 'he'),
+      // Tell vis to use moment with Hebrew for axis/month/day names
+      moment: function(date){ return moment(date).locale('he'); }
+    };
+
+    const timeline = new vis.Timeline(container, itemsData, groupsData, options);
+
+    // ====== Background shading for weekends (Fri+Sat in IL) ======
+    const backgrounds = new vis.DataSet();
+    function addWeekendBackgrounds(start, end){
+      const dayMs = 86400000;
+      const cur = new Date(start);
+      while(cur <= end){
+        const day = cur.getDay(); // 0 Sun ... 6 Sat
+        if(day === 5 || day === 6){ // Fri or Sat
+          const bStart = new Date(cur);
+          const bEnd = new Date(cur.getTime() + dayMs);
+          backgrounds.add({ id: `bg-${bStart.toISOString().slice(0,10)}`, start: bStart, end: bEnd, type: 'background', className: 'weekend' });
         }
+        cur.setDate(cur.getDate()+1);
       }
-    );
-
-    function zoomIn() {
-      const w = timeline.getWindow();
-      const range = w.end - w.start;
-      const center = w.start.valueOf() + range / 2;
-      const newRange = range * 0.6;
-      timeline.setWindow(center - newRange/2, center + newRange/2, {animation: 400});
     }
+    addWeekendBackgrounds(RANGE_START, RANGE_END);
+    timeline.setItems(new vis.DataSet([ ...backgrounds.get(), ...itemsData.get() ]));
 
-    function zoomOut() {
-      const w = timeline.getWindow();
-      const range = w.end - w.start;
-      const center = w.start.valueOf() + range / 2;
-      const newRange = range / 0.6;
-      timeline.setWindow(center - newRange/2, center + newRange/2, {animation: 400});
+    // ====== Today marker ======
+    function addNowLine(){
+      try{ timeline.addCustomTime(new Date(), 'now'); }catch(e){ /* already exists */ }
+      timeline.setCustomTimeTitle('now', 'היום');
     }
+    addNowLine();
 
-    function fitAll() {
-      timeline.setWindow('2025-09-01', '2026-02-01', {animation: 400});
-    }
+    // Show today's date in header badge
+    const today = new Date();
+    document.getElementById('todayText').textContent = today.toLocaleDateString('he-IL', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
 
-    const tbody = document.getElementById('tableBody');
-    const fmt = d => parseDate(d).toLocaleDateString('he-IL');
+    // ====== Zoom controls ======
+    const ZOOM_STEP = 0.6;
+    function timelineRange(){ const r = timeline.getWindow(); return {start: r.start.valueOf(), end: r.end.valueOf()}; }
+    function setRange(start, end){ timeline.setWindow(start, end, {animation: {duration:400}}); }
 
-    let currentFilter = null;
+    document.getElementById('zoomIn').onclick = ()=>{
+      const {start, end} = timelineRange();
+      const interval = end - start;
+      const newInterval = interval * ZOOM_STEP;
+      const center = start + interval/2;
+      setRange(center - newInterval/2, center + newInterval/2);
+    };
+    document.getElementById('zoomOut').onclick = ()=>{
+      const {start, end} = timelineRange();
+      const interval = end - start;
+      const newInterval = interval / ZOOM_STEP;
+      const center = start + interval/2;
+      setRange(center - newInterval/2, center + newInterval/2);
+    };
+    document.getElementById('fitAll').onclick = ()=> setRange(RANGE_START, RANGE_END);
+    document.getElementById('goToday').onclick = ()=> timeline.moveTo(new Date(), { animation: { duration: 400 } });
 
-    function renderTable() {
-      tbody.innerHTML = '';
-      const sorted = [...DATA].sort((a,b) => parseDate(a.start) - parseDate(b.start));
-      
-      sorted.forEach((item, i) => {
-        if (currentFilter && !currentFilter.has(item.domain)) return;
-        
+    // ====== Tasks table ======
+    const tableBody = document.querySelector('#tasksTable tbody');
+    const fmtDate = (d)=> d.toLocaleDateString('he-IL', { year:'numeric', month:'2-digit', day:'2-digit' });
+
+    function renderTable(filterDomains){
+      tableBody.innerHTML = '';
+      const sorted = [...rawData].sort((a,b)=> parseDate(a.start) - parseDate(b.start));
+      let idx = 1;
+      for(const item of sorted){
+        if(filterDomains && !filterDomains.has(item.domain)) continue;
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${i + 1}</td>
+          <td>${idx}</td>
           <td>
-            <span class="chip" style="background:${COLORS[item.domain]}20;color:${COLORS[item.domain]}">
-              <span class="dot" style="background:${COLORS[item.domain]}"></span>
+            <span class="chip">
+              <span class="dot" style="background:${DOMAIN_COLORS[item.domain]}"></span>
               ${item.domain}
             </span>
           </td>
           <td><strong>${item.name}</strong></td>
-          <td>${fmt(item.start)}</td>
-          <td>${fmt(item.end)}</td>
+          <td>${fmtDate(parseDate(item.start))}</td>
+          <td>${fmtDate(parseDate(item.end))}</td>
           <td>
-            <div class="progress-bar">
-              <div class="progress-fill" style="width:${item.progress}%"></div>
-            </div>
-            <small>${item.progress}%</small>
+            <div class="progress-bar"><div class="progress-fill" style="width:${item.progress}%"></div></div>
+            <span class="small muted">${item.progress}%</span>
           </td>
-          <td>
-            <a class="link" onclick="focusItem(${item.id})">הצג בגאנט</a>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function focusItem(id) {
-      const item = items.get(id);
-      if (!item) return;
-      
-      if (currentFilter && !currentFilter.has(item.group)) {
-        document.querySelectorAll('.filter').forEach(inp => {
-          if (inp.value === item.group) inp.checked = true;
-        });
-        applyFilter();
+          <td class="actions"><a onclick="focusOnItem(${item.id});return false;">הצג בגאנט</a></td>`;
+        tableBody.appendChild(tr);
+        idx++;
       }
-      
-      setTimeout(() => timeline.focus(id, {animation: 500}), 100);
     }
-    window.focusItem = focusItem;
-
-    function applyFilter() {
-      const checks = [...document.querySelectorAll('.filter')];
-      const selected = new Set(checks.filter(c => c.checked).map(c => c.value));
-      
-      currentFilter = selected.size === Object.keys(COLORS).length ? null : selected;
-      
-      if (currentFilter) {
-        const filtered = items.get().filter(it => currentFilter.has(it.group));
-        timeline.setItems(new vis.DataSet(filtered));
-        timeline.setGroups(new vis.DataSet(
-          [...currentFilter].map(name => ({id: name, content: name}))
-        ));
-      } else {
-        timeline.setItems(items);
-        timeline.setGroups(groups);
-      }
-      
-      renderTable();
-    }
-
-    document.querySelectorAll('.filter').forEach(inp => {
-      inp.addEventListener('change', applyFilter);
-    });
-
     renderTable();
+
+    // ====== Focus function ======
+    let currentFilter = null;
+    function focusOnItem(itemId){
+      const item = itemsData.get(itemId);
+      if(!item) return;
+      if(currentFilter && !currentFilter.has(item.group)){
+        filterInputs.forEach(inp=>{ if(inp.value === item.group) inp.checked = true; });
+        rebuildFilter();
+      }
+      setTimeout(()=> timeline.focus(itemId, {animation: {duration: 500}}), 100);
+    }
+    window.focusOnItem = focusOnItem;
+
+    // ====== Filtering ======
+    const filterInputs = document.querySelectorAll('.domain-filter');
+    function rebuildFilter(){
+      const selected = new Set([...filterInputs].filter(i=>i.checked).map(i=>i.value));
+      currentFilter = selected.size === Object.keys(DOMAIN_COLORS).length ? null : selected;
+
+      const base = itemsData.get();
+      let nextItems = base;
+      let nextGroups = groupsData.get();
+
+      if(currentFilter){
+        nextItems = base.filter(it => currentFilter.has(it.group));
+        nextGroups = [...currentFilter].map(name => ({id: name, content: name}));
+      }
+
+      // keep backgrounds
+      const merged = [ ...backgrounds.get(), ...nextItems ];
+      timeline.setItems(new vis.DataSet(merged));
+      timeline.setGroups(new vis.DataSet(nextGroups));
+      renderTable(currentFilter);
+    }
+    filterInputs.forEach(inp=> inp.addEventListener('change', rebuildFilter));
+
+    // ====== Download JSON ======
+    document.getElementById('downloadJson').onclick = ()=>{
+      const blob = new Blob([JSON.stringify(rawData, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'data.json'; a.click();
+      URL.revokeObjectURL(url);
+    };
+
   </script>
 </body>
 </html>
