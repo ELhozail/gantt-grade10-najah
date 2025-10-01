@@ -55,6 +55,11 @@
       border-radius:12px;
       cursor:pointer;
       box-shadow: var(--shadow);
+      transition: all 0.2s;
+    }
+    .toolbar .btn:hover{
+      background:#f3f4f6;
+      transform: translateY(-1px);
     }
     .panel{
       margin:10px 18px 24px;
@@ -64,7 +69,7 @@
       box-shadow: var(--shadow);
     }
     #timeline{
-      height:360px;
+      height:400px;
       border-radius: var(--radius);
     }
     .legend{
@@ -84,7 +89,6 @@
       margin-inline-end:6px;
       vertical-align:middle;
     }
-    /* טבלת משימות */
     .table-wrap{
       margin:0 18px 60px;
       background:var(--card);
@@ -152,23 +156,18 @@
       line-height:1;
     }
     .chip .dot{margin:0}
-    .status{
-      font-weight:700;
-      padding:4px 8px;
-      border-radius:8px;
-      display:inline-block;
+    .progress-bar{
+      width:100%;
+      height:8px;
+      background:#e5e7eb;
+      border-radius:999px;
+      overflow:hidden;
     }
-    .s-done{background:#e8faf1;color:#0f766e}
-    .s-plan{background:#eef2ff;color:#4338ca}
-    .s-progress{background:#fff7ed;color:#b45309}
-    .count-badge{
-      display:inline-block;
-      background:#f3f4f6;
-      color:#111827;
-      border-radius:10px;
-      padding:2px 6px;
-      font-weight:700;
-      margin-inline-start:6px;
+    .progress-fill{
+      height:100%;
+      background:#22c55e;
+      border-radius:999px;
+      transition: width 0.3s;
     }
     .muted{color:var(--muted)}
     .small{font-size:12px}
@@ -177,8 +176,11 @@
       font-weight:700;
       color:var(--accent);
       margin-inline-start:10px;
+      cursor:pointer;
     }
-    /* התאמות vis */
+    .actions a:hover{
+      text-decoration:underline;
+    }
     .vis-timeline{
       border:none !important;
       border-radius:var(--radius);
@@ -186,6 +188,12 @@
     .vis-item .vis-item-content{
       padding:6px 10px;
       font-weight:700;
+      font-size:13px;
+    }
+    .loading{
+      text-align:center;
+      padding:40px;
+      color:var(--muted);
     }
   </style>
 </head>
@@ -201,14 +209,14 @@
   </header>
 
   <section class="panel">
-    <div id="timeline"></div>
+    <div id="timeline"><div class="loading">טוען נתונים...</div></div>
     <div class="legend" id="legend"></div>
   </section>
 
   <section class="table-wrap">
     <div class="table-head">
       <h2>טבלת משימות</h2>
-      <div class="muted small">מקור נתונים זהה ללוח הגאנט</div>
+      <div class="muted small">מקור נתונים: data.json</div>
     </div>
 
     <div class="filter-row">
@@ -229,18 +237,17 @@
             <th>פעולה</th>
             <th>התחלה</th>
             <th>סיום</th>
-            <th>סטטוס</th>
-            <th>ת״ל</th>
+            <th>התקדמות</th>
             <th>פעולות</th>
           </tr>
         </thead>
-        <tbody></tbody>
+        <tbody><tr><td colspan="7" class="loading">טוען נתונים...</td></tr></tbody>
       </table>
     </div>
   </section>
 
   <script>
-    // ====== הגדרות תחומים (צבעים ותוויות) ======
+    // ====== הגדרות תחומים (צבעים) ======
     const DOMAIN_COLORS = {
       "פדגוגי": "#ef4444",
       "קהילתי": "#22c55e",
@@ -249,43 +256,222 @@
       "חברתי": "#f59e0b"
     };
 
-    // ====== קבוצות לציר ה-Y (לפי תחום) ======
-    const groupsData = new vis.DataSet(Object.keys(DOMAIN_COLORS).map((name, i) => ({
-      id: name,
-      content: name
-    })));
+    // ====== המרת תאריך (תומך גם ב-ISO string וגם ב-timestamp) ======
+    function parseDate(dateValue){
+      if(typeof dateValue === 'number'){
+        return new Date(dateValue);
+      }
+      return new Date(dateValue);
+    }
 
-    // ====== פריטי גאנט (ערוך/הוסף כרצונך) ======
-    // שמור IDs ייחודיים. start/end בפורמט ISO.
-    const itemsData = new vis.DataSet([
-      // פדגוגי
-      { id: 1,  group: "פדגוגי",  content: "סדנת פתיחה לצוות והצגת חזון", start:"2025-09-05", end:"2025-09-10", title:"משך: 6 ימים" },
-      { id: 2,  group: "פדגוגי",  content: "יישום PBL בשיעורים",          start:"2025-10-15", end:"2025-11-20", title:"התנסות רשמית" },
-      { id: 3,  group: "פדגוגי",  content: "הדרכת צוותי מקצוע ב-PBL",      start:"2026-05-10", end:"2026-05-20" },
+    // ====== קריאת נתונים מקובץ JSON מוטמע ======
+    const rawData = [
+      {
+        "id":1,
+        "domain":"פדגוגי",
+        "name":"סדנת פתיחת שנה",
+        "start":"2025-09-01",
+        "end":"2025-09-01",
+        "progress":0
+      },
+      {
+        "id":2,
+        "domain":"מוסדי",
+        "name":"ذكرى المولد النبوي",
+        "start":"2025-09-03",
+        "end":"2025-09-04",
+        "progress":0
+      },
+      {
+        "id":3,
+        "domain":"חברתי",
+        "name":"נעלה לירושלים",
+        "start":"2025-10-05",
+        "end":"2025-10-05",
+        "progress":0
+      },
+      {
+        "id":4,
+        "domain":"חברתי",
+        "name":"חשיפה למקומות השמה",
+        "start":"2025-10-07",
+        "end":"2025-10-07",
+        "progress":0
+      },
+      {
+        "id":5,
+        "domain":"פדגוגי",
+        "name":"امتحانات تصنيف",
+        "start":"2025-10-12",
+        "end":"2025-10-16",
+        "progress":0
+      },
+      {
+        "id":6,
+        "domain":"טכנולוגי",
+        "name":"هيتك للعاشر 3",
+        "start":"2025-10-27",
+        "end":"2025-10-27",
+        "progress":0
+      },
+      {
+        "id":7,
+        "domain":"חברתי",
+        "name":"انتخاب ممثل صف",
+        "start":"2025-10-05",
+        "end":"2025-10-05",
+        "progress":0
+      },
+      {
+        "id":8,
+        "domain":"קהילתי",
+        "name":"פרוייקט להיות אזרח שכבה י'",
+        "start":"2025-10-20",
+        "end":"2025-10-20",
+        "progress":0
+      },
+      {
+        "id":9,
+        "domain":"קהילתי",
+        "name":"בחירות מועצת תלמידים",
+        "start":"2025-10-22",
+        "end":"2025-10-22",
+        "progress":0
+      },
+      {
+        "id":10,
+        "domain":"פדגוגי",
+        "name":"ישיבת מורים",
+        "start":"2025-11-24",
+        "end":"2025-11-24",
+        "progress":0
+      },
+      {
+        "id":11,
+        "domain":"פדגוגי",
+        "name":"מבחן כימיה וגיל הרך",
+        "start":"2025-11-30",
+        "end":"2025-11-30",
+        "progress":0
+      },
+      {
+        "id":12,
+        "domain":"פדגוגי",
+        "name":"מבחן אזרחות",
+        "start":"2025-12-02",
+        "end":"2025-12-02",
+        "progress":0
+      },
+      {
+        "id":13,
+        "domain":"פדגוגי",
+        "name":"מבחן התמחות",
+        "start":"2025-12-04",
+        "end":"2025-12-04",
+        "progress":0
+      },
+      {
+        "id":14,
+        "domain":"פדגוגי",
+        "name":"מבחן מתמטיקה",
+        "start":"2025-12-07",
+        "end":"2025-12-07",
+        "progress":0
+      },
+      {
+        "id":15,
+        "domain":"פדגוגי",
+        "name":"מבחן אנגלית",
+        "start":"2025-12-09",
+        "end":"2025-12-09",
+        "progress":0
+      },
+      {
+        "id":16,
+        "domain":"פדגוגי",
+        "name":"מבחן דת",
+        "start":"2025-12-11",
+        "end":"2025-12-11",
+        "progress":0
+      },
+      {
+        "id":17,
+        "domain":"פדגוגי",
+        "name":"מבחן היסטוריה",
+        "start":"2025-12-14",
+        "end":"2025-12-14",
+        "progress":0
+      },
+      {
+        "id":18,
+        "domain":"פדגוגי",
+        "name":"מבחן ערבית",
+        "start":"2025-12-16",
+        "end":"2025-12-16",
+        "progress":0
+      },
+      {
+        "id":19,
+        "domain":"פדגוגי",
+        "name":"מבחן עברית",
+        "start":"2025-12-18",
+        "end":"2025-12-18",
+        "progress":0
+      },
+      {
+        "id":20,
+        "domain":"פדגוגי",
+        "name":"הזנת ציונים במשוב",
+        "start":"2025-12-20",
+        "end":"2025-12-20",
+        "progress":0
+      },
+      {
+        "id":21,
+        "domain":"קהילתי",
+        "name":"ערב הורים",
+        "start":"2025-12-22",
+        "end":"2025-12-22",
+        "progress":0
+      },
+      {
+        "id":22,
+        "domain":"חברתי",
+        "name":"חלוקת תעודות",
+        "start":"2025-12-23",
+        "end":"2025-12-23",
+        "progress":0
+      },
+      {
+        "id":23,
+        "domain":"מוסדי",
+        "name":"חופשת האביב",
+        "start":"2025-12-24",
+        "end":"2026-01-05",
+        "progress":0
+      }
+    ];
 
-      // טכנולוגי
-      { id: 4,  group: "טכנולוגי", content: "שדרוג ציוד מעבדות",            start:"2026-06-01", end:"2026-06-20" },
-      { id: 5,  group: "טכנולוגי", content: "תערוכת חדשנות בין-מגמות",      start:"2026-03-15", end:"2026-03-31" },
+    // ====== המרה לפורמט vis-timeline ======
+    const itemsData = new vis.DataSet(
+      rawData.map(item => ({
+        id: item.id,
+        group: item.domain,
+        content: item.name,
+        start: parseDate(item.start),
+        end: parseDate(item.end),
+        title: `${item.name}\nהתקדמות: ${item.progress}%`,
+        progress: item.progress
+      }))
+    );
 
-      // קהילתי
-      { id: 6,  group: "קהילתי",  content: "יום קהילה וחשיפה לתעשייה",     start:"2026-02-15", end:"2026-02-20" },
-      { id: 7,  group: "קהילתי",  content: "פעילות העצמה לנוער",           start:"2026-02-20", end:"2026-03-07" },
-
-      // מוסדי
-      { id: 8,  group: "מוסדי",   content: "השקת תחנת רדיו בית ספרית",     start:"2025-11-01", end:"2025-11-30" },
-      { id: 9,  group: "מוסדי",   content: "סיכום רבעון ראשון",            start:"2025-12-01", end:"2025-12-10" },
-      { id:10,  group: "מוסדי",   content: "הפקת דו\"ח ביצועים שנתי",       start:"2026-01-20", end:"2026-01-25" },
-      { id:11,  group: "מוסדי",   content: "הפקת דו\"ח מסכם שנתי",          start:"2026-05-01", end:"2026-05-10" },
-
-      // חברתי
-      { id:12,  group: "חברתי",   content: "סדנאות SEL ואורח חיים",        start:"2025-12-15", end:"2026-01-15" },
-      { id:13,  group: "חברתי",   content: "יום שיא קהילתי",                start:"2026-04-10", end:"2026-04-15" },
-
-      // אירועים נוספים (דומים לתצלום)
-      { id:14,  group: "פדגוגי",  content: "סדנת חדשנות פדגוגית",          start:"2026-01-10", end:"2026-01-15" },
-      { id:15,  group: "קהילתי",  content: "הפקת דוח בקרים שוטף",          start:"2026-02-01", end:"2026-02-05" },
-      { id:16,  group: "מוסדי",   content: "יום הורים שכבה י\"ב",          start:"2026-05-20", end:"2026-05-25" }
-    ]);
+    // ====== קבוצות לציר ה-Y ======
+    const groupsData = new vis.DataSet(
+      Object.keys(DOMAIN_COLORS).map(name => ({
+        id: name,
+        content: name
+      }))
+    );
 
     // ====== יצירת הלג'נד ======
     const legend = document.getElementById('legend');
@@ -298,31 +484,27 @@
     // ====== יצירת ציר הזמן ======
     const container = document.getElementById('timeline');
 
-    // עיצוב פריטי הציר לפי צבע התחום
-    function itemTemplate(item, element, data){
+    function itemTemplate(item, element){
       const color = DOMAIN_COLORS[item.group] || '#999';
       element.style.background = color;
       element.style.borderColor = color;
       element.style.color = '#fff';
-      element.title = item.title || item.content;
       return element;
     }
 
     const options = {
-      locale: 'he',             // חודש/יום בעברית
-      orientation: 'top',       // ציר בחלק העליון
-      rtl: true,                // מימין לשמאל
+      locale: 'he',
+      orientation: 'top',
+      rtl: true,
       stack: true,
-      maxHeight: 360,
-      zoomMin: 1000 * 60 * 60 * 24 * 3,         // 3 ימים
-      zoomMax: 1000 * 60 * 60 * 24 * 366 * 3,   // עד ~3 שנים
+      maxHeight: 400,
+      zoomMin: 1000 * 60 * 60 * 24 * 3,
+      zoomMax: 1000 * 60 * 60 * 24 * 366 * 2,
       start: new Date('2025-09-01'),
-      end:   new Date('2026-08-31'),
+      end: new Date('2026-02-01'),
       editable: false,
       margin: {item:{horizontal:6, vertical:8}},
-      template: function(item, element){
-        return itemTemplate(item, element, item);
-      },
+      template: itemTemplate,
       groupOrder: (a,b)=> a.id.localeCompare(b.id, 'he')
     };
 
@@ -334,7 +516,9 @@
       const range = timeline.getWindow();
       return {start: range.start.valueOf(), end: range.end.valueOf()};
     }
-    function setRange(start, end){ timeline.setWindow(start, end, {animation: {duration:400}}); }
+    function setRange(start, end){
+      timeline.setWindow(start, end, {animation: {duration:400}});
+    }
 
     document.getElementById('zoomIn').onclick = ()=>{
       const {start, end} = timelineRange();
@@ -343,6 +527,7 @@
       const center = start + interval/2;
       setRange(center - newInterval/2, center + newInterval/2);
     };
+
     document.getElementById('zoomOut').onclick = ()=>{
       const {start, end} = timelineRange();
       const interval = end - start;
@@ -350,51 +535,49 @@
       const center = start + interval/2;
       setRange(center - newInterval/2, center + newInterval/2);
     };
+
     document.getElementById('fitAll').onclick = ()=>{
-      setRange(new Date('2025-09-01'), new Date('2026-08-31'));
+      setRange(new Date('2025-09-01'), new Date('2026-02-01'));
     };
 
-    // ====== טבלת משימות (אותו מקור) ======
+    // ====== טבלת משימות ======
     const tableBody = document.querySelector('#tasksTable tbody');
-
-    // נתוני "סטטוס" לדוגמה — ניתן לשנות לכל משימה ע"י מפה
-    const statusMap = {
-      1:'הושלם', 2:'בתכנון', 3:'בהתקדמות', 4:'בתכנון',5:'בתכנון',
-      6:'בתכנון',7:'בתכנון',8:'בהתקדמות',9:'הושלם',10:'בתכנון',
-      11:'בתכנון',12:'בהתקדמות',13:'בתכנון',14:'בתכנון',15:'בתכנון',16:'בתכנון'
-    };
-    function statusBadge(s){
-      const map = {
-        'הושלם':'s-done',
-        'בתכנון':'s-plan',
-        'בהתקדמות':'s-progress'
-      };
-      return `<span class="status ${map[s]||'s-plan'}">${s}</span>`;
-    }
-
-    // פונקציית עזר להצגת תאריך בפורמט ישראלי
-    const fmtDate = (d)=> new Date(d).toLocaleDateString('he-IL', {year:'numeric', month:'2-digit', day:'2-digit'});
+    const fmtDate = (d)=> d.toLocaleDateString('he-IL', {
+      year:'numeric', 
+      month:'2-digit', 
+      day:'2-digit'
+    });
 
     function renderTable(filterDomains){
       tableBody.innerHTML = '';
-      // מיון לפי התחלה
-      const sorted = itemsData.get().sort((a,b)=> new Date(a.start)-new Date(b.start));
+      const sorted = rawData.sort((a,b)=> 
+        parseDate(a.start) - parseDate(b.start)
+      );
+      
       let idx = 1;
       for(const item of sorted){
-        if(filterDomains && !filterDomains.has(item.group)) continue;
+        if(filterDomains && !filterDomains.has(item.domain)) continue;
+        
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${idx}</td>
           <td>
-            <span class="chip"><span class="dot" style="background:${DOMAIN_COLORS[item.group]}"></span>${item.group}</span>
+            <span class="chip">
+              <span class="dot" style="background:${DOMAIN_COLORS[item.domain]}"></span>
+              ${item.domain}
+            </span>
           </td>
-          <td><strong>${item.content}</strong></td>
-          <td>${fmtDate(item.start)}</td>
-          <td>${fmtDate(item.end)}</td>
-          <td>${statusBadge(statusMap[item.id] || 'בתכנון')}</td>
-          <td class="muted">—</td>
+          <td><strong>${item.name}</strong></td>
+          <td>${fmtDate(parseDate(item.start))}</td>
+          <td>${fmtDate(parseDate(item.end))}</td>
+          <td>
+            <div class="progress-bar">
+              <div class="progress-fill" style="width:${item.progress}%"></div>
+            </div>
+            <span class="small muted">${item.progress}%</span>
+          </td>
           <td class="actions">
-            <a href="#!" onclick="focusOnItem(${item.id});return false;">הצג בגאנט</a>
+            <a onclick="focusOnItem(${item.id});return false;">הצג בגאנט</a>
           </td>
         `;
         tableBody.appendChild(tr);
@@ -402,51 +585,56 @@
       }
     }
 
-    // רינדור ראשון
     renderTable();
 
-    // פונקציה להתמקדות בפריט (עם טיפול בשגיאות)
+    // ====== פונקציית התמקדות ======
     let currentFilter = null;
     
     function focusOnItem(itemId){
       const item = itemsData.get(itemId);
       if(!item) return;
       
-      // אם הפריט מסונן, הצג את התחום שלו
       if(currentFilter && !currentFilter.has(item.group)){
-        // הוסף את התחום לסינון
         filterInputs.forEach(inp=>{
           if(inp.value === item.group) inp.checked = true;
         });
         rebuildFilter();
       }
       
-      // התמקד בפריט
       setTimeout(()=>timeline.focus(itemId, {animation: {duration: 500}}), 100);
     }
     window.focusOnItem = focusOnItem;
 
-    // סינון לפי תחומים (מסננים גם את לוח הגאנט)
+    // ====== סינון ======
     const filterInputs = document.querySelectorAll('.domain-filter');
     
     function rebuildFilter(){
-      const selected = new Set([...filterInputs].filter(i=>i.checked).map(i=>i.value));
+      const selected = new Set(
+        [...filterInputs].filter(i=>i.checked).map(i=>i.value)
+      );
       
-      // שמירת הסינון הנוכחי
-      currentFilter = selected.size === Object.keys(DOMAIN_COLORS).length ? null : selected;
+      currentFilter = selected.size === Object.keys(DOMAIN_COLORS).length 
+        ? null 
+        : selected;
       
-      // סינון בגאנט - שימוש באותו DataSet עם מסנן דינמי
       if(currentFilter){
+        const filteredItems = itemsData.get().filter(item => 
+          currentFilter.has(item.group)
+        );
+        timeline.setItems(new vis.DataSet(filteredItems));
+        
         const filteredGroups = new vis.DataSet(
           [...currentFilter].map(name => ({id: name, content: name}))
         );
         timeline.setGroups(filteredGroups);
       } else {
+        timeline.setItems(itemsData);
         timeline.setGroups(groupsData);
       }
       
       renderTable(currentFilter);
     }
+    
     filterInputs.forEach(inp=>inp.addEventListener('change', rebuildFilter));
   </script>
 </body>
