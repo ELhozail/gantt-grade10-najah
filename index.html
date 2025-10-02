@@ -98,7 +98,7 @@
 <body>
 
 <!-- שכבת התחברות -->
-<div id="authOverlay" class="auth-overlay" style="display:none">
+<div id="authOverlay" class="auth-overlay" style="display:flex">
   <div class="auth-card">
     <img class="logo" alt="Logo" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%230b63b6' offset='0'/><stop stop-color='%233b82f6' offset='1'/></linearGradient></defs><rect rx='22' ry='22' width='128' height='128' fill='url(%23g)'/><path d='M26 82h76v10H26zM36 36h56v10H36zM36 52h56v10H36z' fill='white' opacity='0.9'/><circle cx='64' cy='90' r='6' fill='white'/></svg>">
     <h2>🔐 כניסה למערכת</h2>
@@ -328,6 +328,7 @@ const defaultKpis = [
   {id:"k5",  domain:"קהילתי",     metric:"אירועי קהילה/תעשייה",        target:"לפחות 3",                tool:"דוחות חשיפה",        status:"בתכנון", note:""},
   {id:"k6",  domain:"חברתי רגשי", metric:"תחושת שייכות",               target:"≥ 80%",                  tool:"סקרי SEL",            status:"בתכנון", note:""},
   {id:"k7",  domain:"מוסדי",      metric:"דוחות בקרה",                 target:"2 לשנה",                 tool:"מערכת בקרה",          status:"בתכנון", note:""},
+  {id:"k8",  domain:"קהילתי",     metric:"מפגשי בוגרים",               target:"2 בשנה",                 tool:"קשרי קהילה",          status:"בתכנון", note:""},
   {id:"k9",  domain:"העשרה",      metric:"מספר חוגים פעילים",          target:"≥ 4",                    tool:"מערכת חוגים",         status:"בתכנון", note:""},
   {id:"k10", domain:"העשרה",      metric:"השתתפות בחוגים",             target:"≥ 60%",                  tool:"דוחות נוכחות",        status:"בתכנון", note:""},
   {id:"k11", domain:"מוסדי",      metric:"בטיחות סדנאות",              target:"100% תקן",               tool:"רשומות בטיחות",       status:"בתכנון", note:""},
