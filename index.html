@@ -12,27 +12,29 @@
 
 <style>
   :root{
-    --blue:#0b63b6;
-    --gray:#f6f7f9;
-    --border:#e5e7eb;
-    --text:#111827;
-    --muted:#6b7280;
-    --chip:#eef2ff;
+    --blue:#38bdf8;      /* accent */
+    --gray:#1f2937;      /* surfaces */
+    --border:#374151;    /* borders */
+    --text:#f9fafb;      /* primary text */
+    --muted:#9ca3af;     /* secondary text */
+    --chip:#111827;      /* chip bg */
+    --bg:#0b1220;        /* page bg */
+    --card:#111827;      /* cards */
   }
   *{box-sizing:border-box}
-  body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--text);margin:0}
+  body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);margin:0}
 
-  header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;justify-content:space-between;background:#fff}
+  header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;justify-content:space-between;background:var(--card);position:sticky;top:0;z-index:10}
   h1{margin:0;color:var(--blue);font-size:22px}
-  .btn{border:1px solid var(--border);background:#fff;padding:8px 10px;border-radius:8px;cursor:pointer;color:var(--text)}
-  .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+  .btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 10px;border-radius:8px;cursor:pointer}
+  .btn.primary{background:var(--blue);border-color:var(--blue);color:#000}
   .btn.danger{background:#e11d48;border-color:#e11d48;color:#fff}
   .btn.success{background:#16a34a;border-color:#16a34a;color:#fff}
   .btn.icon{display:inline-flex;gap:6px;align-items:center}
 
-  .filters{display:flex;flex-wrap:wrap;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);background:#fafafa}
+  .filters{display:flex;flex-wrap:wrap;gap:10px;padding:10px 20px;border-bottom:1px solid var(--border);background:var(--gray)}
   .filters label{font-size:13px;color:var(--muted)}
-  .filters input[type="date"], .filters select, .filters input[type="text"]{padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text)}
+  .filters input[type="date"], .filters select, .filters input[type="text"]{padding:6px 8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)}
 
   .legend{display:flex;gap:8px;align-items:center;color:var(--muted)}
   .sw{width:14px;height:14px;border-radius:4px;border:1px solid #0003;display:inline-block;margin-left:6px}
@@ -41,22 +43,22 @@
   .chip{padding:6px 10px;border-radius:999px;font-size:13px;background:var(--chip);cursor:pointer;border:1px solid var(--border);color:var(--text)}
   .chip.active{outline:2px solid var(--blue)}
 
-  #ganttWrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:#fff}
+  #ganttWrap{border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--card)}
   #gantt{min-height:460px;padding:12px 0}
 
   section{padding:14px 20px}
-  table{width:100%;border-collapse:collapse;background:#fff;color:var(--text)}
+  table{width:100%;border-collapse:collapse;background:var(--card);color:var(--text)}
   th,td{border:1px solid var(--border);padding:8px;text-align:center}
-  th{background:#f0f2f6;color:var(--text)}
+  th{background:#1f2937;color:var(--text)}
   .actions{display:flex;gap:6px;justify-content:center}
-  select, input[type="number"], input[type="text"]{padding:6px;border:1px solid var(--border);border-radius:6px;background:#fff;color:var(--text)}
+  select, input[type="number"], input[type="text"]{padding:6px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text)}
 
   /* מודאל עריכה */
-  dialog{border:none;border-radius:12px;max-width:560px;width:92%}
-  dialog::backdrop{background:rgb(0 0 0 / .45)}
+  dialog{border:none;border-radius:12px;max-width:560px;width:92%;background:var(--card);color:var(--text)}
+  dialog::backdrop{background:rgb(0 0 0 / .65)}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .form-grid label{font-size:13px;color:var(--muted)}
-  .form-grid input,.form-grid select, .form-grid textarea{width:100%;padding:7px;border:1px solid var(--border);border-radius:8px}
+  .form-grid input,.form-grid select, .form-grid textarea{width:100%;padding:7px;border:1px solid var(--border);border-radius:8px;background:#0b1220;color:var(--text)}
   .row{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
 
   /* צבעים לפי תחום */
@@ -68,69 +70,17 @@
   .c-מוסדי{background:#f59e0b}
 
   /* הדפסה */
-  #printBar{padding:10px 20px;border-bottom:1px solid var(--border);background:#fafafa;color:var(--text)}
+  #printBar{padding:10px 20px;border-bottom:1px solid var(--border);background:var(--gray);color:var(--text)}
   @media print{
     header,.filters,#printBar{display:none !important}
     body{background:#fff;color:#000}
     table{page-break-inside:avoid;background:#fff;color:#000}
   }
-  /* ====== התחברות (Overlay) ====== */
-  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .auth-card{background:#fff;border:1px solid var(--border);border-radius:14px;min-width:320px;max-width:92vw;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
-  .auth-card h2{margin:0 0 12px;color:var(--blue);font-size:20px;text-align:center}
-  .auth-card label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-  .auth-card input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:4px}
-  .auth-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
-  .note{font-size:12px;color:#6b7280}
-  /* ====== התחברות (Overlay) ====== */
-  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .auth-card{background:#fff;border:1px solid var(--border);border-radius:14px;min-width:340px;max-width:92vw;padding:20px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
-  .auth-card h2{margin:6px 0 12px;color:var(--blue);font-size:20px;text-align:center}
-  .auth-card label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
-  .auth-card input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:4px}
-  .auth-row{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
-  .auth-card .logo{display:block;margin:0 auto 6px;width:64px;height:64px}
-
-  /* אפליקציה מוסתרת עד התחברות */
-  #appRoot{display:none}
 </style>
 </head>
 <body>
 
-<!-- שכבת התחברות -->
-<div id="authOverlay" class="auth-overlay" style="display:flex">
-  <div class="auth-card">
-    <img class="logo" alt="Logo" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%230b63b6' offset='0'/><stop stop-color='%233b82f6' offset='1'/></linearGradient></defs><rect rx='22' ry='22' width='128' height='128' fill='url(%23g)'/><path d='M26 82h76v10H26zM36 36h56v10H36zM36 52h56v10H36z' fill='white' opacity='0.9'/><circle cx='64' cy='90' r='6' fill='white'/></svg>">
-    <h2>🔐 כניסה למערכת</h2>
-    <form id="loginForm">
-      <label>שם משתמש<input id="loginUser" autocomplete="username" required></label>
-      <label>סיסמה<input id="loginPass" type="password" autocomplete="current-password" required></label>
-      <div class="auth-row">
-        <button class="btn primary" type="submit">כניסה</button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<div id="appRoot">
-
-<!-- שכבת התחברות -->
-<div id="authOverlay" class="auth-overlay" style="display:none">
-  <div class="auth-card">
-    <h2>🔐 כניסה למערכת</h2>
-    <form id="loginForm">
-      <label>שם משתמש<input id="loginUser" autocomplete="username" placeholder="admin" required></label>
-      <label>סיסמה<input id="loginPass" type="password" autocomplete="current-password" placeholder="••••" required></label>
-      <div class="auth-row">
-        <span class="note">טיפ: ברירת מחדל admin / 1234</span>
-        <button class="btn primary" type="submit">כניסה</button>
-      </div>
-    </form>
-  </div>
-</div>
-
 <header>
-  <img id="brandLogo" alt="Logo" style="height:28px;border-radius:6px" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='120' height='32' viewBox='0 0 120 32'><rect rx='6' ry='6' width='120' height='32' fill='%230b63b6'/><text x='60' y='21' text-anchor='middle' font-family='Arial' font-size='14' fill='white'>אלנגאח • גאנט</text></svg>">
   <h1>תרשים גאנט • בית הספר אלנגאח רהט שכבה י'</h1>
   <div id="toolbar">
     <button class="btn primary icon" id="addTaskBtn">➕ הוסף פעילות</button>
@@ -144,8 +94,6 @@
       📥 ייבוא JSON <input id="importJson" type="file" accept="application/json" style="display:none">
     </label>
     <button class="btn danger" id="resetBtn">♻️ איפוס</button>
-    <button class="btn" id="logoutBtn">🚪 התנתק</button>
-    <button class="btn" id="logoutBtn">🚪 התנתק</button>
   </div>
 </header>
 
@@ -271,12 +219,6 @@
 </dialog>
 
 <script>
-/* ====== התחברות – קונפיג ברירת מחדל (Front‑only) ====== */
-const AUTH = { username: 'admin', password: '1234' }; // עדכן לפי הצורך
-function auth_ok(){ return sessionStorage.getItem('auth_ok')==='1'; }
-function showAuth(){ byId('authOverlay').style.display='flex'; byId('appRoot').style.display='none'; }
-function hideAuth(){ byId('authOverlay').style.display='none'; byId('appRoot').style.display='block'; }
-
 /* ====== טעינת Google Charts ====== */
 google.charts.load('current', {packages:['timeline']});
 
@@ -295,7 +237,7 @@ function newId(){ return Date.now().toString(36); }
 /* ====== נתוני ברירת מחדל – הוחלפו לפי הבקשה ====== */
 const defaultTasks = [
   {id:"1", domain:"פדגוגי",  action:"סדנת פתיחת שנה",                 start:"2025-09-01", end:"2025-09-01", status:"בתכנון", dependencies:"", progress:0,  note:""},
-  {id:"2", domain:"מוסדי",    action:"ذكرى المولد النبوي",             start:"2025-09-03", end:"2025-09-04", status:"בתכנון", dependencies:"", progress:0,  note:""},
+  {id:"2", domain:"מוסדי",    action:"ذكرى المولد النבوي",             start:"2025-09-03", end:"2025-09-04", status:"בתכנון", dependencies:"", progress:0,  note:""},
   {id:"3", domain:"חברתי",    action:"נעלה לירושלים",                  start:"2025-10-05", end:"2025-10-05", status:"בתכנון", dependencies:"", progress:0,  note:""},
   {id:"4", domain:"חברתי",    action:"חשיפה למקומות השמה",            start:"2025-10-07", end:"2025-10-07", status:"בתכנון", dependencies:"", progress:0,  note:""},
   {id:"5", domain:"פדגוגי",   action:"امتحانات تصنيف",                 start:"2025-10-12", end:"2025-10-16", status:"בתכנון", dependencies:"", progress:0,  note:""},
@@ -392,7 +334,7 @@ function drawGantt(){
   const container = byId('gantt');
   container.innerHTML='';
   const data = filteredTasks();
-  if(!data.length){ container.innerHTML='<div style="padding:16px;color:#666">אין נתונים לתצוגה</div>'; return; }
+  if(!data.length){ container.innerHTML='<div style="padding:16px;color:#9ca3af">אין נתונים לתצוגה</div>'; return; }
 
   const dt = new google.visualization.DataTable();
   dt.addColumn({type:'string', id:'Domain'});
@@ -402,13 +344,14 @@ function drawGantt(){
   dt.addColumn({type:'string', role:'style'});
 
   data.forEach(t=>{
-    const style = `color: ${COLORS[t.domain]||'#0b63b6'}`;
+    const style = `color: ${COLORS[t.domain]||'#38bdf8'}`;
     dt.addRow([t.domain, t.action, new Date(t.start), new Date(t.end), style]);
   });
 
   const opts = {
-    timeline:{groupByRowLabel:true, colorByRowLabel:false, barLabelStyle:{fontSize:12}},
-    hAxis:{format: currentView==='Day'?'d.M.yyyy': currentView==='Week'?'d.M':'MMM yyyy'}
+    timeline:{groupByRowLabel:true, colorByRowLabel:false, barLabelStyle:{fontSize:12,color:'#e5e7eb'}},
+    hAxis:{format: currentView==='Day'?'d.M.yyyy': currentView==='Week'?'d.M':'MMM yyyy', textStyle:{color:'#cbd5e1'}},
+    backgroundColor: 'transparent'
   };
 
   timelineChart = new google.visualization.Timeline(container);
@@ -605,8 +548,7 @@ byId('printBtn').onclick = ()=>{
   if(incG) html += byId('ganttWrap').outerHTML;
   if(incT) html += byId('taskTable').outerHTML;
   if(incK) html += byId('kpiTable').outerHTML;
-  html+='</div>
-</body></html>';
+  html+='</body></html>';
   const w=window.open('','print');
   w.document.write(html); w.document.close(); w.focus(); w.print(); w.close();
 };
@@ -656,33 +598,7 @@ function drawAll(){
 
 /* טעינה ראשונית */
 renderChips();
-
-// אתחול התחברות
-(function initAuth(){
-  const form = document.getElementById('loginForm');
-  if(form){
-    form.onsubmit = (e)=>{
-      e.preventDefault();
-      const u = document.getElementById('loginUser').value.trim();
-      const p = document.getElementById('loginPass').value;
-      if(u===AUTH.username && p===AUTH.password){
-        sessionStorage.setItem('auth_ok','1');
-        hideAuth();
-        google.charts.setOnLoadCallback(drawAll);
-      }else{
-        alert('שם משתמש או סיסמה שגויים');
-      }
-    };
-  }
-  if(auth_ok()){
-    hideAuth();
-    google.charts.setOnLoadCallback(drawAll);
-  }else{
-    showAuth();
-  }
-  const logoutBtn = document.getElementById('logoutBtn');
-  if(logoutBtn){ logoutBtn.onclick = ()=>{ sessionStorage.removeItem('auth_ok'); showAuth(); }; }
-})();
+google.charts.setOnLoadCallback(drawAll);
 </script>
 </body>
 </html>
