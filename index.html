@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<title>תרשים גאנט חדשנות פדגוגית • בית הספר אלנגאח רהט '</title>
+<title>תרשים גאנט חדשנות פדגוגית • בית הספר אלנגאח רהט שכבה י'</title>
 
 <!-- Google Charts -->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -82,9 +82,37 @@
   .auth-card input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:4px}
   .auth-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
   .note{font-size:12px;color:#6b7280}
+  /* ====== התחברות (Overlay) ====== */
+  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:9999}
+  .auth-card{background:#fff;border:1px solid var(--border);border-radius:14px;min-width:340px;max-width:92vw;padding:20px 18px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+  .auth-card h2{margin:6px 0 12px;color:var(--blue);font-size:20px;text-align:center}
+  .auth-card label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .auth-card input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:4px}
+  .auth-row{display:flex;gap:8px;align-items:center;justify-content:flex-end;margin-top:12px}
+  .auth-card .logo{display:block;margin:0 auto 6px;width:64px;height:64px}
+
+  /* אפליקציה מוסתרת עד התחברות */
+  #appRoot{display:none}
 </style>
 </head>
 <body>
+
+<!-- שכבת התחברות -->
+<div id="authOverlay" class="auth-overlay" style="display:none">
+  <div class="auth-card">
+    <img class="logo" alt="Logo" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='128' height='128' viewBox='0 0 128 128'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop stop-color='%230b63b6' offset='0'/><stop stop-color='%233b82f6' offset='1'/></linearGradient></defs><rect rx='22' ry='22' width='128' height='128' fill='url(%23g)'/><path d='M26 82h76v10H26zM36 36h56v10H36zM36 52h56v10H36z' fill='white' opacity='0.9'/><circle cx='64' cy='90' r='6' fill='white'/></svg>">
+    <h2>🔐 כניסה למערכת</h2>
+    <form id="loginForm">
+      <label>שם משתמש<input id="loginUser" autocomplete="username" required></label>
+      <label>סיסמה<input id="loginPass" type="password" autocomplete="current-password" required></label>
+      <div class="auth-row">
+        <button class="btn primary" type="submit">כניסה</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="appRoot">
 
 <!-- שכבת התחברות -->
 <div id="authOverlay" class="auth-overlay" style="display:none">
@@ -102,6 +130,7 @@
 </div>
 
 <header>
+  <img id="brandLogo" alt="Logo" style="height:28px;border-radius:6px" src="data:image/svg+xml;utf8,<?xml version='1.0' encoding='UTF-8'?><svg xmlns='http://www.w3.org/2000/svg' width='120' height='32' viewBox='0 0 120 32'><rect rx='6' ry='6' width='120' height='32' fill='%230b63b6'/><text x='60' y='21' text-anchor='middle' font-family='Arial' font-size='14' fill='white'>אלנגאח • גאנט</text></svg>">
   <h1>תרשים גאנט • בית הספר אלנגאח רהט שכבה י'</h1>
   <div id="toolbar">
     <button class="btn primary icon" id="addTaskBtn">➕ הוסף פעילות</button>
@@ -115,6 +144,7 @@
       📥 ייבוא JSON <input id="importJson" type="file" accept="application/json" style="display:none">
     </label>
     <button class="btn danger" id="resetBtn">♻️ איפוס</button>
+    <button class="btn" id="logoutBtn">🚪 התנתק</button>
     <button class="btn" id="logoutBtn">🚪 התנתק</button>
   </div>
 </header>
@@ -242,10 +272,10 @@
 
 <script>
 /* ====== התחברות – קונפיג ברירת מחדל (Front‑only) ====== */
-const AUTH = { username: 'admin', password: '1234' }; // שנה לפי הצורך
+const AUTH = { username: 'admin', password: '1234' }; // עדכן לפי הצורך
 function auth_ok(){ return sessionStorage.getItem('auth_ok')==='1'; }
-function showAuth(){ byId('authOverlay').style.display='flex'; }
-function hideAuth(){ byId('authOverlay').style.display='none'; }
+function showAuth(){ byId('authOverlay').style.display='flex'; byId('appRoot').style.display='none'; }
+function hideAuth(){ byId('authOverlay').style.display='none'; byId('appRoot').style.display='block'; }
 
 /* ====== טעינת Google Charts ====== */
 google.charts.load('current', {packages:['timeline']});
@@ -298,7 +328,6 @@ const defaultKpis = [
   {id:"k5",  domain:"קהילתי",     metric:"אירועי קהילה/תעשייה",        target:"לפחות 3",                tool:"דוחות חשיפה",        status:"בתכנון", note:""},
   {id:"k6",  domain:"חברתי רגשי", metric:"תחושת שייכות",               target:"≥ 80%",                  tool:"סקרי SEL",            status:"בתכנון", note:""},
   {id:"k7",  domain:"מוסדי",      metric:"דוחות בקרה",                 target:"2 לשנה",                 tool:"מערכת בקרה",          status:"בתכנון", note:""},
-  {id:"k8",  domain:"קהילתי",     metric:"מפגשי בוגרים",               target:"2 בשנה",                 tool:"קשרי קהילה",          status:"בתכנון", note:""},
   {id:"k9",  domain:"העשרה",      metric:"מספר חוגים פעילים",          target:"≥ 4",                    tool:"מערכת חוגים",         status:"בתכנון", note:""},
   {id:"k10", domain:"העשרה",      metric:"השתתפות בחוגים",             target:"≥ 60%",                  tool:"דוחות נוכחות",        status:"בתכנון", note:""},
   {id:"k11", domain:"מוסדי",      metric:"בטיחות סדנאות",              target:"100% תקן",               tool:"רשומות בטיחות",       status:"בתכנון", note:""},
@@ -575,7 +604,8 @@ byId('printBtn').onclick = ()=>{
   if(incG) html += byId('ganttWrap').outerHTML;
   if(incT) html += byId('taskTable').outerHTML;
   if(incK) html += byId('kpiTable').outerHTML;
-  html+='</body></html>';
+  html+='</div>
+</body></html>';
   const w=window.open('','print');
   w.document.write(html); w.document.close(); w.focus(); w.print(); w.close();
 };
@@ -628,8 +658,6 @@ renderChips();
 
 // אתחול התחברות
 (function initAuth(){
-  // אם כבר מחובר בסשן הנוכחי
-  if(auth_ok()) hideAuth(); else showAuth();
   const form = document.getElementById('loginForm');
   if(form){
     form.onsubmit = (e)=>{
@@ -639,18 +667,21 @@ renderChips();
       if(u===AUTH.username && p===AUTH.password){
         sessionStorage.setItem('auth_ok','1');
         hideAuth();
+        google.charts.setOnLoadCallback(drawAll);
       }else{
         alert('שם משתמש או סיסמה שגויים');
       }
     };
   }
-  const logoutBtn = document.getElementById('logoutBtn');
-  if(logoutBtn){
-    logoutBtn.onclick = ()=>{ sessionStorage.removeItem('auth_ok'); showAuth(); };
+  if(auth_ok()){
+    hideAuth();
+    google.charts.setOnLoadCallback(drawAll);
+  }else{
+    showAuth();
   }
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn){ logoutBtn.onclick = ()=>{ sessionStorage.removeItem('auth_ok'); showAuth(); }; }
 })();
-
-google.charts.setOnLoadCallback(drawAll);
 </script>
 </body>
 </html>
