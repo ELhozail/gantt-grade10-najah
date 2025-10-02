@@ -2,7 +2,7 @@
 <html lang="he" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<title>תרשים גאנט חדשנות פדגוגית • בית הספר אלנגאח רהט שכבה י'</title>
+<title>תרשים גאנט חדשנות פדגוגית • בית הספר אלנגאח רהט '</title>
 
 <!-- Google Charts -->
 <script src="https://www.gstatic.com/charts/loader.js"></script>
@@ -74,9 +74,32 @@
     body{background:#fff;color:#000}
     table{page-break-inside:avoid;background:#fff;color:#000}
   }
+  /* ====== התחברות (Overlay) ====== */
+  .auth-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:9999}
+  .auth-card{background:#fff;border:1px solid var(--border);border-radius:14px;min-width:320px;max-width:92vw;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.15)}
+  .auth-card h2{margin:0 0 12px;color:var(--blue);font-size:20px;text-align:center}
+  .auth-card label{display:block;font-size:13px;color:var(--muted);margin-top:8px}
+  .auth-card input{width:100%;padding:10px;border:1px solid var(--border);border-radius:10px;margin-top:4px}
+  .auth-row{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:12px}
+  .note{font-size:12px;color:#6b7280}
 </style>
 </head>
 <body>
+
+<!-- שכבת התחברות -->
+<div id="authOverlay" class="auth-overlay" style="display:none">
+  <div class="auth-card">
+    <h2>🔐 כניסה למערכת</h2>
+    <form id="loginForm">
+      <label>שם משתמש<input id="loginUser" autocomplete="username" placeholder="admin" required></label>
+      <label>סיסמה<input id="loginPass" type="password" autocomplete="current-password" placeholder="••••" required></label>
+      <div class="auth-row">
+        <span class="note">טיפ: ברירת מחדל admin / 1234</span>
+        <button class="btn primary" type="submit">כניסה</button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <header>
   <h1>תרשים גאנט • בית הספר אלנגאח רהט שכבה י'</h1>
@@ -92,6 +115,7 @@
       📥 ייבוא JSON <input id="importJson" type="file" accept="application/json" style="display:none">
     </label>
     <button class="btn danger" id="resetBtn">♻️ איפוס</button>
+    <button class="btn" id="logoutBtn">🚪 התנתק</button>
   </div>
 </header>
 
@@ -217,6 +241,12 @@
 </dialog>
 
 <script>
+/* ====== התחברות – קונפיג ברירת מחדל (Front‑only) ====== */
+const AUTH = { username: 'admin', password: '1234' }; // שנה לפי הצורך
+function auth_ok(){ return sessionStorage.getItem('auth_ok')==='1'; }
+function showAuth(){ byId('authOverlay').style.display='flex'; }
+function hideAuth(){ byId('authOverlay').style.display='none'; }
+
 /* ====== טעינת Google Charts ====== */
 google.charts.load('current', {packages:['timeline']});
 
@@ -595,6 +625,31 @@ function drawAll(){
 
 /* טעינה ראשונית */
 renderChips();
+
+// אתחול התחברות
+(function initAuth(){
+  // אם כבר מחובר בסשן הנוכחי
+  if(auth_ok()) hideAuth(); else showAuth();
+  const form = document.getElementById('loginForm');
+  if(form){
+    form.onsubmit = (e)=>{
+      e.preventDefault();
+      const u = document.getElementById('loginUser').value.trim();
+      const p = document.getElementById('loginPass').value;
+      if(u===AUTH.username && p===AUTH.password){
+        sessionStorage.setItem('auth_ok','1');
+        hideAuth();
+      }else{
+        alert('שם משתמש או סיסמה שגויים');
+      }
+    };
+  }
+  const logoutBtn = document.getElementById('logoutBtn');
+  if(logoutBtn){
+    logoutBtn.onclick = ()=>{ sessionStorage.removeItem('auth_ok'); showAuth(); };
+  }
+})();
+
 google.charts.setOnLoadCallback(drawAll);
 </script>
 </body>
