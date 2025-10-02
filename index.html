@@ -22,10 +22,9 @@
   *{box-sizing:border-box}
   body{font-family:Arial,Helvetica,sans-serif;background:#fff;color:var(--text);margin:0}
 
-  header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+  header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;gap:12px;align-items:center;justify-content:space-between}
   h1{margin:0;color:var(--blue);font-size:22px}
-  #toolbar{display:flex;gap:8px;flex-wrap:wrap}
-  .btn{border:1px solid var(--border);background:#fff;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:14px}
+  .btn{border:1px solid var(--border);background:#fff;padding:8px 10px;border-radius:8px;cursor:pointer}
   .btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
   .btn.danger{background:#e11d48;border-color:#e11d48;color:#fff}
   .btn.success{background:#16a34a;border-color:#16a34a;color:#fff}
@@ -35,7 +34,7 @@
   .filters label{font-size:13px;color:var(--muted)}
   .filters input[type="date"], .filters select, .filters input[type="text"]{padding:6px 8px;border:1px solid var(--border);border-radius:6px}
 
-  .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .legend{display:flex;gap:8px;align-items:center}
   .sw{width:14px;height:14px;border-radius:4px;border:1px solid #0003;display:inline-block;margin-left:6px}
 
   .chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
@@ -49,16 +48,15 @@
   table{width:100%;border-collapse:collapse;background:#fff}
   th,td{border:1px solid var(--border);padding:8px;text-align:center}
   th{background:#f0f2f6}
-  .actions{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+  .actions{display:flex;gap:6px;justify-content:center}
   select, input[type="number"], input[type="text"]{padding:6px;border:1px solid var(--border);border-radius:6px}
 
   /* מודאל עריכה */
-  dialog{border:none;border-radius:12px;max-width:560px;width:92%;padding:20px}
+  dialog{border:none;border-radius:12px;max-width:560px;width:92%}
   dialog::backdrop{background:rgb(0 0 0 / .45)}
   .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .form-grid label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+  .form-grid label{font-size:13px;color:var(--muted)}
   .form-grid input,.form-grid select, .form-grid textarea{width:100%;padding:7px;border:1px solid var(--border);border-radius:8px}
-  .form-group{grid-column:1/3}
   .row{display:flex;gap:10px;justify-content:flex-end;margin-top:10px}
 
   /* צבעים לפי תחום */
@@ -163,7 +161,7 @@
   <form method="dialog">
     <h3 style="margin:0 0 10px;color:var(--blue)">פעילות</h3>
     <div class="form-grid">
-      <div class="form-group"><label>שם הפעילות</label><input id="tName"></div>
+      <div><label>שם הפעילות</label><input id="tName"></div>
       <div><label>תחום</label>
         <select id="tDomain">
           <option>פדגוגי</option><option>לימודי</option><option>טכנולוגי</option>
@@ -176,15 +174,15 @@
         <select id="tStatus"><option>בתכנון</option><option>בתהליך</option><option>הושלם</option><option>נדחה</option></select>
       </div>
       <div><label>Progress %</label><input type="number" id="tProg" min="0" max="100" value="0"></div>
-      <div class="form-group"><label>תלות (מזהים מופרדים בפסיק)</label><input id="tDep" placeholder="למשל: 1,3"></div>
+      <div style="grid-column:1/3"><label>תלות (מזהים מופרדים בפסיק)</label><input id="tDep" placeholder="למשל: 1,3"></div>
       <div><label>מזהה</label><input id="tId" disabled></div>
       <div><label>הערות</label><input id="tNote" placeholder="הערות פנימיות"></div>
     </div>
     <div class="row">
       <button class="btn danger" type="button" id="tDelete">מחיקה</button>
       <div style="flex:1"></div>
-      <button class="btn" type="button" id="tCancel">ביטול</button>
-      <button class="btn primary" type="button" id="tSave">שמירה</button>
+      <button class="btn" type="button" onclick="byId('taskDlg').close()">ביטול</button>
+      <button class="btn primary" id="tSave">שמירה</button>
     </div>
   </form>
 </dialog>
@@ -203,17 +201,17 @@
       <div><label>סטטוס</label>
         <select id="kStatus"><option>בתכנון</option><option>בתהליך</option><option>הושלם</option></select>
       </div>
-      <div class="form-group"><label>מדד ביצוע</label><input id="kMetric"></div>
+      <div style="grid-column:1/3"><label>מדד ביצוע</label><input id="kMetric"></div>
       <div><label>יעד שנתי</label><input id="kTarget"></div>
       <div><label>כלי מדידה</label><input id="kTool"></div>
       <div><label>מזהה</label><input id="kId" disabled></div>
-      <div class="form-group"><label>הערות</label><input id="kNote" placeholder="הערות פנימיות"></div>
+      <div style="grid-column:1/3"><label>הערות</label><input id="kNote" placeholder="הערות פנימיות"></div>
     </div>
     <div class="row">
       <button class="btn danger" type="button" id="kDelete">מחיקה</button>
       <div style="flex:1"></div>
-      <button class="btn" type="button" id="kCancel">ביטול</button>
-      <button class="btn primary" type="button" id="kSave">שמירה</button>
+      <button class="btn" type="button" onclick="byId('kpiDlg').close()">بיטול</button>
+      <button class="btn primary" id="kSave">שמירה</button>
     </div>
   </form>
 </dialog>
@@ -234,31 +232,28 @@ function withinSchoolYear(date){ const d=new Date(date); return d>=YEAR_START &&
 function clampToSchoolYear(date){ const d=new Date(date); if(d<YEAR_START) return fmt(YEAR_START); if(d>YEAR_END) return fmt(YEAR_END); return fmt(d); }
 function newId(){ return Date.now().toString(36); }
 
-/* ====== נתוני ברירת מחדל – משימות בית ספר אלנגאח רהט ====== */
+/* ====== נתוני ברירת מחדל – 20 פעילויות מפורטות ====== */
 const defaultTasks = [
-  {id:"1",  domain:"פדגוגי",  action:"סדנת פתיחת שנה",              start:"2025-09-01", end:"2025-09-01", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"2",  domain:"מוסדי",   action:"ذكرى المولد النبوي",           start:"2025-09-03", end:"2025-09-04", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"3",  domain:"חברתי",   action:"נעלה לירושלים",                start:"2025-10-05", end:"2025-10-05", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"4",  domain:"חברתי",   action:"חשיפה למקומות השמה",           start:"2025-10-07", end:"2025-10-07", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"5",  domain:"פדגוגי",  action:"امتحانات تصنيف",               start:"2025-10-12", end:"2025-10-16", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"6",  domain:"טכנולוגי",action:"هيتك للعاشر 3",                 start:"2025-10-27", end:"2025-10-27", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"7",  domain:"חברתי",   action:"انتخاب ممثل صف",                start:"2025-10-05", end:"2025-10-05", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"8",  domain:"קהילתי",  action:"פרוייקט להיות אזרח שכבה י'",    start:"2025-10-20", end:"2025-10-20", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"9",  domain:"קהילתי",  action:"בחירות מועצת תלמידים",          start:"2025-10-22", end:"2025-10-22", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"10", domain:"פדגוגי",  action:"ישיבת מורים",                   start:"2025-11-24", end:"2025-11-24", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"11", domain:"פדגוגי",  action:"מבחן כימיה וגיל הרך",           start:"2025-11-30", end:"2025-11-30", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"12", domain:"פדגוגי",  action:"מבחן אזרחות",                   start:"2025-12-02", end:"2025-12-02", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"13", domain:"פדגוגי",  action:"מבחן התמחות",                   start:"2025-12-04", end:"2025-12-04", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"14", domain:"פדגוגי",  action:"מבחן מתמטיקה",                  start:"2025-12-07", end:"2025-12-07", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"15", domain:"פדגוגי",  action:"מבחן אנגלית",                   start:"2025-12-09", end:"2025-12-09", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"16", domain:"פדגוגי",  action:"מבחן דת",                       start:"2025-12-11", end:"2025-12-11", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"17", domain:"פדגוגי",  action:"מבחן היסטוריה",                 start:"2025-12-14", end:"2025-12-14", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"18", domain:"פדגוגי",  action:"מבחן ערבית",                    start:"2025-12-16", end:"2025-12-16", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"19", domain:"פדגוגי",  action:"מבחן עברית",                    start:"2025-12-18", end:"2025-12-18", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"20", domain:"פדגוגי",  action:"הזנת ציונים במשוב",             start:"2025-12-20", end:"2025-12-20", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"21", domain:"קהילתי",  action:"ערב הורים",                     start:"2025-12-22", end:"2025-12-22", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"22", domain:"חברתי",   action:"חלוקת תעודות",                  start:"2025-12-23", end:"2025-12-23", status:"בתכנון",  dependencies:"", progress:0, note:""},
-  {id:"23", domain:"מוסדי",   action:"חופשת האביב",                   start:"2025-12-24", end:"2026-01-07", status:"בתכנון",  dependencies:"", progress:0, note:""}
+  {id:"1",  domain:"פדגוגי",  action:"סדנת פתיחה לצוות והצגת חזון",  start:"2025-09-05", end:"2025-09-10", status:"הושלם",   dependencies:"", progress:100, note:""},
+  {id:"2",  domain:"לימודי",   action:"מיפוי תלמידי י\"א חדשים והערכת פערים", start:"2025-09-15", end:"2025-10-10", status:"בתהליך", dependencies:"", progress:70, note:""},
+  {id:"3",  domain:"טכנולוגי", action:"יישום יחידות PBL ראשונות",   start:"2025-10-15", end:"2025-11-20", status:"בתכנון",  dependencies:"2", progress:30, note:""},
+  {id:"4",  domain:"קהילתי",   action:"השקת תחנת רדיו בית ספרית",    start:"2025-11-01", end:"2025-11-30", status:"בתכנון",  dependencies:"", progress:10, note:""},
+  {id:"5",  domain:"מוסדי",    action:"סיכום רבעון ראשון",            start:"2025-12-01", end:"2025-12-10", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"6",  domain:"חברתי",    action:"סדנאות SEL וכישורי חיים",      start:"2025-12-15", end:"2026-01-15", status:"בתהליך", dependencies:"", progress:25, note:""},
+  {id:"7",  domain:"פדגוגי",   action:"סדנת חדשנות פדגוגית",          start:"2026-01-20", end:"2026-01-25", status:"בתכנון",  dependencies:"5", progress:0,  note:""},
+  {id:"8",  domain:"מוסדי",    action:"הפקת דוח ביניים שנתי",         start:"2026-02-01", end:"2026-02-05", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"9",  domain:"קהילתי",   action:"יום קהילה וחשיפה לתעשייה",     start:"2026-02-15", end:"2026-02-20", status:"בתכנון",  dependencies:"3", progress:0,  note:""},
+  {id:"10", domain:"חברתי",    action:"פעילויות העצמה לנוער",         start:"2026-03-01", end:"2026-03-07", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"11", domain:"טכנולוגי", action:"תערוכת פרויקטים בין-מגמתיים",  start:"2026-03-15", end:"2026-03-31", status:"בתכנון",  dependencies:"3", progress:0,  note:""},
+  {id:"12", domain:"קהילתי",   action:"יום שיא מוסדי להצגת תוצרים",    start:"2026-04-10", end:"2026-04-15", status:"בתכנון",  dependencies:"11",progress:0,  note:""},
+  {id:"13", domain:"מוסדי",    action:"הפקת דוח מסכם שנתי",           start:"2026-05-01", end:"2026-05-10", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"14", domain:"חברתי",    action:"יום גיבוש שכבת י\"ב",          start:"2026-05-15", end:"2026-05-20", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"15", domain:"פדגוגי",   action:"הדרכת מורים ב-PBL",            start:"2026-05-25", end:"2026-05-30", status:"בתכנון",  dependencies:"3", progress:0,  note:""},
+  {id:"16", domain:"טכנולוגי", action:"שדרוג ציוד מעבדות",             start:"2026-06-01", end:"2026-06-05", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"17", domain:"קהילתי",   action:"שותפויות עם רשויות ועמותות",   start:"2026-06-10", end:"2026-06-20", status:"בתהליך", dependencies:"", progress:50, note:""},
+  {id:"18", domain:"מוסדי",    action:"ועידת חינוך בית ספרית",        start:"2026-07-01", end:"2026-07-05", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"19", domain:"חברתי",    action:"מחנה קיץ בית ספרי",             start:"2026-07-20", end:"2026-07-30", status:"בתכנון",  dependencies:"", progress:0,  note:""},
+  {id:"20", domain:"פדגוגי",   action:"סדנת סיכום שנה לצוות",          start:"2026-08-10", end:"2026-08-15", status:"בתכנון",  dependencies:"13",progress:0,  note:""}
 ];
 
 /* ====== KPI ברירת מחדל (15) ====== */
@@ -287,10 +282,7 @@ let activeDomains = new Set(DOMAINS);
 let currentView = 'Month';
 let timelineChart;
 
-function save(){ 
-  localStorage.setItem('tasks_v3', JSON.stringify(tasks)); 
-  localStorage.setItem('kpis_v3', JSON.stringify(kpis)); 
-}
+function save(){ localStorage.setItem('tasks_v3', JSON.stringify(tasks)); localStorage.setItem('kpis_v3', JSON.stringify(kpis)); }
 
 /* ====== סינון ====== */
 function renderChips(){
@@ -299,13 +291,22 @@ function renderChips(){
     const el=document.createElement('span');
     el.className='chip'+(activeDomains.has(dom)?' active':'');
     el.textContent=dom;
-    el.onclick=()=>{ 
-      activeDomains.has(dom)?activeDomains.delete(dom):activeDomains.add(dom); 
-      drawAll(); 
-    };
+    el.onclick=()=>{ activeDomains.has(dom)?activeDomains.delete(dom):activeDomains.add(dom); drawAll(); };
     wrap.appendChild(el);
   });
 }
+byId('statusFilter').onchange = ()=>drawAll();
+byId('fromDate').onchange = ()=>drawAll();
+byId('toDate').onchange   = ()=>drawAll();
+byId('searchTxt').oninput = ()=>drawAll();
+byId('clearFilters').onclick = ()=>{
+  activeDomains = new Set(DOMAINS);
+  byId('statusFilter').value='all';
+  byId('fromDate').value='';
+  byId('toDate').value='';
+  byId('searchTxt').value='';
+  drawAll();
+};
 
 function filteredTasks(){
   const st = byId('statusFilter').value;
@@ -328,10 +329,7 @@ function drawGantt(){
   const container = byId('gantt');
   container.innerHTML='';
   const data = filteredTasks();
-  if(!data.length){ 
-    container.innerHTML='<div style="padding:16px;color:#666;text-align:center">אין נתונים לתצוגה</div>'; 
-    return; 
-  }
+  if(!data.length){ container.innerHTML='<div style="padding:16px;color:#666">אין נתונים לתצוגה</div>'; return; }
 
   const dt = new google.visualization.DataTable();
   dt.addColumn({type:'string', id:'Domain'});
@@ -353,7 +351,6 @@ function drawGantt(){
   timelineChart = new google.visualization.Timeline(container);
   timelineChart.draw(dt, opts);
 }
-
 window.onresize = ()=>{ if(timelineChart) drawGantt(); };
 
 /* ====== טבלת משימות ====== */
@@ -361,30 +358,241 @@ function drawTasksTable(){
   const tb = byId('taskTable').querySelector('tbody');
   tb.innerHTML='';
   filteredTasks().forEach((t,i)=>{
-    const row = tb.insertRow();
-    row.innerHTML = `
-      <td>${i+1}</td>
-      <td>${t.domain}</td>
-      <td>${t.action}</td>
-      <td>${t.start}</td>
-      <td>${t.end}</td>
-      <td>
-        <select onchange="window.updateTaskStatus('${t.id}',this.value)">
-          <option ${t.status==='בתכנון'?'selected':''}>בתכנון</option>
-          <option ${t.status==='בתהליך'?'selected':''}>בתהליך</option>
-          <option ${t.status==='הושלם'?'selected':''}>הושלם</option>
-          <option ${t.status==='נדחה'?'selected':''}>נדחה</option>
-        </select>
-      </td>
-      <td>${t.dependencies||''}</td>
-      <td class="actions">
-        <button class="btn" onclick="window.openTask('${t.id}')">✏️ עריכה</button>
-        <button class="btn danger" onclick="window.removeTask('${t.id}')">🗑️ מחיקה</button>
-      </td>
-    `;
+    tb.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${i+1}</td>
+        <td>${t.domain}</td>
+        <td>${t.action}</td>
+        <td>${t.start}</td>
+        <td>${t.end}</td>
+        <td>
+          <select onchange="updateTaskStatus('${t.id}',this.value)">
+            <option ${t.status==='בתכנון'?'selected':''}>בתכנון</option>
+            <option ${t.status==='בתהליך'?'selected':''}>בתהליך</option>
+            <option ${t.status==='הושלם'?'selected':''}>הושלם</option>
+            <option ${t.status==='נדחה'?'selected':''}>נדחה</option>
+          </select>
+        </td>
+        <td>${t.dependencies||''}</td>
+        <td class="actions">
+          <button class="btn" onclick="openTask('${t.id}')">✏️ עריכה</button>
+          <button class="btn danger" onclick="removeTask('${t.id}')">🗑️ מחיקה</button>
+        </td>
+      </tr>
+    `);
   });
 }
 
 /* ====== טבלת KPI ====== */
 function drawKpiTable(){
   const tb = byId('kpiTable').querySelector('tbody');
+  tb.innerHTML='';
+  kpis.forEach((k,i)=>{
+    tb.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${i+1}</td>
+        <td>${k.domain}</td>
+        <td>${k.metric}</td>
+        <td>${k.target}</td>
+        <td>${k.tool}</td>
+        <td>
+          <select onchange="updateKpiStatus('${k.id}',this.value)">
+            <option ${k.status==='בתכנון'?'selected':''}>בתכנון</option>
+            <option ${k.status==='בתהליך'?'selected':''}>בתהליך</option>
+            <option ${k.status==='הושלם'?'selected':''}>הושלם</option>
+          </select>
+        </td>
+        <td class="actions">
+          <button class="btn" onclick="openKpi('${k.id}')">✏️ עריכה</button>
+          <button class="btn danger" onclick="removeKpi('${k.id}')">🗑️ מחיקה</button>
+        </td>
+      </tr>
+    `);
+  });
+}
+
+/* ====== CRUD משימות – מודאל ====== */
+byId('addTaskBtn').onclick = ()=>{
+  const dlg = byId('taskDlg');
+  byId('tId').value='(חדש)';
+  byId('tName').value='פעילות חדשה';
+  byId('tDomain').value='לימודי';
+  byId('tStart').value='2025-09-15';
+  byId('tEnd').value='2025-09-20';
+  byId('tStatus').value='בתכנון';
+  byId('tProg').value=0;
+  byId('tDep').value='';
+  byId('tNote').value='';
+  byId('tDelete').style.visibility='hidden';
+  dlg.showModal();
+  byId('tSave').onclick = (e)=>{ e.preventDefault(); saveTaskForm(null); };
+};
+
+function openTask(id){
+  const t = tasks.find(x=>x.id===id);
+  const dlg = byId('taskDlg');
+  byId('tId').value=t.id;
+  byId('tName').value=t.action;
+  byId('tDomain').value=t.domain;
+  byId('tStart').value=t.start;
+  byId('tEnd').value=t.end;
+  byId('tStatus').value=t.status;
+  byId('tProg').value=t.progress||0;
+  byId('tDep').value=t.dependencies||'';
+  byId('tNote').value=t.note||'';
+  byId('tDelete').style.visibility='visible';
+  dlg.showModal();
+  byId('tSave').onclick = (e)=>{ e.preventDefault(); saveTaskForm(t.id); };
+  byId('tDelete').onclick = ()=>{ removeTask(id); dlg.close(); };
+}
+
+function saveTaskForm(existingId){
+  let start = clampToSchoolYear(byId('tStart').value);
+  let end   = clampToSchoolYear(byId('tEnd').value);
+  if(new Date(start)>new Date(end)){ alert('תאריך התחלה חייב להיות לפני/שווה לסיום'); return; }
+  if(!withinSchoolYear(start)||!withinSchoolYear(end)){ alert('שנת הלימודים: 01.09.2025–31.08.2026'); return; }
+  const obj = {
+    id: existingId || newId(),
+    domain: byId('tDomain').value,
+    action: byId('tName').value.trim(),
+    start, end,
+    status: byId('tStatus').value,
+    dependencies: byId('tDep').value.trim(),
+    progress: Math.max(0,Math.min(100, Number(byId('tProg').value||0))),
+    note: byId('tNote').value.trim()
+  };
+  if(existingId){ tasks = tasks.map(t=>t.id===existingId?obj:t); }
+  else{ tasks.push(obj); }
+  save(); byId('taskDlg').close(); drawAll();
+}
+
+function removeTask(id){
+  if(!confirm('למחוק את הפעילות?')) return;
+  tasks = tasks.filter(t=>t.id!==id);
+  save(); drawAll();
+}
+function updateTaskStatus(id,val){
+  tasks = tasks.map(t=>t.id===id?{...t,status:val}:t);
+  save(); drawGantt(); drawTasksTable();
+}
+
+/* ====== CRUD KPI – מודאל ====== */
+byId('addKpiBtn').onclick = ()=>{
+  const dlg = byId('kpiDlg');
+  byId('kId').value='(חדש)';
+  byId('kDomain').value='לימודי';
+  byId('kMetric').value='מדד חדש';
+  byId('kTarget').value='יעד חדש';
+  byId('kTool').value='כלי מדידה';
+  byId('kStatus').value='בתכנון';
+  byId('kNote').value='';
+  byId('kDelete').style.visibility='hidden';
+  dlg.showModal();
+  byId('kSave').onclick=(e)=>{e.preventDefault(); saveKpiForm(null);};
+};
+
+function openKpi(id){
+  const k = kpis.find(x=>x.id===id);
+  const dlg = byId('kpiDlg');
+  byId('kId').value=k.id;
+  byId('kDomain').value=k.domain;
+  byId('kMetric').value=k.metric;
+  byId('kTarget').value=k.target;
+  byId('kTool').value=k.tool;
+  byId('kStatus').value=k.status;
+  byId('kNote').value=k.note||'';
+  byId('kDelete').style.visibility='visible';
+  dlg.showModal();
+  byId('kSave').onclick=(e)=>{e.preventDefault(); saveKpiForm(k.id);};
+  byId('kDelete').onclick=()=>{ removeKpi(id); dlg.close(); };
+}
+
+function saveKpiForm(existingId){
+  const obj = {
+    id: existingId || newId(),
+    domain: byId('kDomain').value,
+    metric: byId('kMetric').value.trim(),
+    target: byId('kTarget').value.trim(),
+    tool: byId('kTool').value.trim(),
+    status: byId('kStatus').value,
+    note: byId('kNote').value.trim()
+  };
+  if(existingId){ kpis = kpis.map(k=>k.id===existingId?obj:k); }
+  else{ kpis.push(obj); }
+  save(); byId('kpiDlg').close(); drawKpiTable();
+}
+
+function removeKpi(id){
+  if(!confirm('למחוק את ה-KPI?')) return;
+  kpis = kpis.filter(k=>k.id!==id);
+  save(); drawKpiTable();
+}
+function updateKpiStatus(id,val){
+  kpis = kpis.map(k=>k.id===id?{...k,status:val}:k);
+  save();
+}
+
+/* ====== הדפסה ====== */
+byId('printBtn').onclick = ()=>{
+  const incG = byId('printGantt').checked;
+  const incT = byId('printTasks').checked;
+  const incK = byId('printKpi').checked;
+  let html = `<html dir="rtl"><head><meta charset="utf-8"><title>הדפסה</title>
+  <style>body{font-family:Arial} table{width:100%;border-collapse:collapse} th,td{border:1px solid #ccc;padding:6px;text-align:center} th{background:#eee}</style></head><body>`;
+  if(incG) html += byId('ganttWrap').outerHTML;
+  if(incT) html += byId('taskTable').outerHTML;
+  if(incK) html += byId('kpiTable').outerHTML;
+  html+='</body></html>';
+  const w=window.open('','print');
+  w.document.write(html); w.document.close(); w.focus(); w.print(); w.close();
+};
+
+/* ====== ייצוא/ייבוא/איפוס ====== */
+byId('exportXlsxBtn').onclick = ()=>{
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(tasks), 'משימות');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(kpis),  'KPI');
+  XLSX.writeFile(wb, 'school_plan.xlsx');
+};
+byId('exportJsonBtn').onclick = ()=>{
+  const blob = new Blob([JSON.stringify({tasks,kpis},null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='school_plan.json'; a.click();
+};
+byId('importJson').onchange = (e)=>{
+  const file = e.target.files[0]; if(!file) return;
+  const fr = new FileReader();
+  fr.onload = () =>{
+    try{
+      const obj = JSON.parse(fr.result);
+      if(Array.isArray(obj.tasks)&&Array.isArray(obj.kpis)){
+        tasks=obj.tasks; kpis=obj.kpis; save(); drawAll();
+      }else alert('קובץ JSON לא תקין');
+    }catch(err){ alert('שגיאה בקריאת JSON'); }
+  };
+  fr.readAsText(file);
+};
+byId('resetBtn').onclick = () =>{
+  if(!confirm('לאפס לנתוני ברירת מחדל?')) return;
+  tasks = structuredClone(defaultTasks);
+  kpis  = structuredClone(defaultKpis);
+  save(); drawAll();
+};
+
+/* ====== תצוגה – יום/שבוע/חודש ====== */
+byId('viewDay').onclick  = ()=>{ currentView='Day';  drawGantt(); };
+byId('viewWeek').onclick = ()=>{ currentView='Week'; drawGantt(); };
+byId('viewMonth').onclick= ()=>{ currentView='Month';drawGantt(); };
+
+/* ====== רענון כולל ====== */
+function drawAll(){
+  drawGantt();
+  drawTasksTable();
+  drawKpiTable();
+}
+
+/* טעינה ראשונית */
+renderChips();
+google.charts.setOnLoadCallback(drawAll);
+</script>
+</body>
+</html>
